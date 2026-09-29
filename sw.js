@@ -2,7 +2,7 @@
 // The page and story list are fetched fresh when online (so updates show up),
 // and fall back to the saved copy when offline. Stories, icons and fonts are
 // saved the first time they load and served from the phone after that.
-const CACHE = "bongboi-v2";
+const CACHE = "bongboi-v3";
 const CORE = ["./", "index.html", "stories/catalog.json", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -22,7 +22,9 @@ self.addEventListener("fetch", e => {
   const fresh = req.mode === "navigate" || url.pathname.endsWith("/index.html") || url.pathname.endsWith("/catalog.json");
 
   if (fresh) {
-    e.respondWith(fetch(req).then(res => {
+    // "no-cache" asks GitHub Pages whether the file changed, instead of trusting the
+    // browser's own copy for up to 10 minutes after a push.
+    e.respondWith(fetch(req.url, {cache: "no-cache"}).then(res => {
       const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res;
     }).catch(() => caches.match(req).then(r => r || caches.match("index.html"))));
     return;

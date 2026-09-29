@@ -1,0 +1,635 @@
+<title>bongBoi</title>
+<meta name="theme-color" content="#EDF1F5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Anek+Bangla:wght@400;500;600&display=swap">
+<style>
+/* Layout: two views in one narrow column. Library = continue card, search, stories grouped by volume.
+   Reader = a feed of short posts that loads as you scroll; the post at screen centre stays sharp. */
+:root{
+  --bg:#EDF1F5;        /* pale autumn-sky grey */
+  --surface:#FFFFFF;
+  --ink:#1B2230;
+  --muted:#5E6878;
+  --line:#D5DCE5;
+  --accent:#2E5A88;    /* ink blue */
+  --accent-soft:#E1EAF4;
+  --mark:#B8741A;      /* shiuli-stem saffron: earmarks and progress */
+  --mark-soft:#F6E9D6;
+  --scrim:rgba(20,26,36,.45);
+  --story:"Tiro Bangla","Noto Serif Bengali",serif;
+  --ui:"Anek Bangla","Noto Sans Bengali",system-ui,sans-serif;
+  --fs:19px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11151C;--surface:#1A202A;--ink:#E4E8EE;--muted:#9AA4B3;--line:#2B3340;
+  --accent:#8DB4E2;--accent-soft:#223246;--mark:#E0A450;--mark-soft:#3A2E1E;--scrim:rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151C;--surface:#1A202A;--ink:#E4E8EE;--muted:#9AA4B3;--line:#2B3340;
+  --accent:#8DB4E2;--accent-soft:#223246;--mark:#E0A450;--mark-soft:#3A2E1E;--scrim:rgba(0,0,0,.6);color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.5;padding-inline:16px}
+.wrap{max-width:560px;margin:0 auto}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
+  padding-block:12px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.head-main{flex:1;min-width:0}
+.head-main h1{font-family:var(--story);font-weight:400;font-size:22px;margin:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.head-main p{margin:0;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand{font-family:var(--story);font-size:24px;margin:0}
+.brand small{font-family:var(--ui);font-size:13px;color:var(--muted);margin-left:6px}
+.bar{height:3px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--mark);transition:width .25s}
+.prog{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- library ---------- */
+#library{padding-block:16px 60px;display:flex;flex-direction:column;gap:18px}
+.shelfh{font-size:12px;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin:0 0 8px}
+.shelf{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding:2px 16px 8px;scrollbar-width:thin}
+.scard{position:relative;flex:0 0 min(62%,220px);scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.scard:first-child{border-color:var(--accent)}
+.scard .open{display:flex;flex-direction:column;gap:4px;width:100%;height:100%;text-align:left;border:0;background:transparent;padding:12px 34px 12px 12px;cursor:pointer;border-radius:14px}
+.scard .t{font-family:var(--story);font-size:19px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.scard .snip{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.scard .bar{margin-top:auto}
+.scard .x{position:absolute;top:6px;right:6px;width:26px;height:26px;border:0;border-radius:50%;background:transparent;color:var(--muted);font-size:17px;line-height:1;cursor:pointer}
+.scard .x:hover{background:var(--accent-soft);color:var(--ink)}
+.toast button{margin-left:10px;border:0;background:transparent;color:var(--bg);font-weight:600;text-decoration:underline;cursor:pointer;padding:0}
+.search{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit}
+.vol h2{font-family:var(--story);font-weight:400;font-size:18px;margin:0 0 8px;color:var(--muted)}
+.list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px;text-align:left;width:100%;
+  border:0;border-top:1px solid var(--line);background:transparent;padding:11px 14px;cursor:pointer}
+.row:first-child{border-top:0}
+.row:hover{background:var(--accent-soft)}
+.row .t{font-family:var(--story);font-size:18px;min-width:0}
+.row .m{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.row .m.done{color:var(--mark);font-weight:600}
+.row .mini{grid-column:1/-1;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.row .mini i{display:block;height:100%;background:var(--mark)}
+.empty{color:var(--muted);font-size:14px;padding:12px}
+.src{font-size:12px;color:var(--muted)}
+
+/* ---------- reader ---------- */
+#reader{padding-block:0 45vh}
+.intro{margin:18px 0 0;color:var(--muted);font-size:13px}
+.feed{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.post{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px 16px 16px 4px;
+  padding:12px 14px 8px;cursor:pointer;transition:filter .3s,opacity .3s,border-color .3s,box-shadow .3s}
+.post .txt{font-family:var(--story);font-size:var(--fs);line-height:1.7;margin:0;text-wrap:pretty;white-space:pre-line}
+.post.dialogue{border-left:3px solid var(--accent)}
+.post .meta{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.post .meta .n{margin-right:auto}
+.post .meta button{border:0;background:transparent;padding:4px 8px;border-radius:8px;cursor:pointer;color:var(--accent);font-size:12px}
+.post .meta button:hover{background:var(--accent-soft)}
+.post .meta .ear{color:var(--muted)}
+.post.marked{border-color:var(--mark)}
+.post.marked::after{content:"";position:absolute;top:-1px;right:18px;width:14px;height:22px;background:var(--mark);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 72%,0 100%)}
+.post.marked .meta .ear{color:var(--mark);font-weight:600}
+.brk{text-align:center;color:var(--muted);letter-spacing:.5em;font-size:13px;padding-block:6px;transition:opacity .3s}
+body.f-blur .post:not(.focus){filter:blur(2px);opacity:.35}
+body.f-dim  .post:not(.focus){opacity:.3}
+body.f-blur .brk,body.f-dim .brk{opacity:.3}
+body.f-blur .post.focus,body.f-dim .post.focus{border-color:var(--accent);box-shadow:0 6px 24px rgba(20,40,70,.12)}
+body.f-blur .post.marked.focus,body.f-dim .post.marked.focus{border-color:var(--mark)}
+.sentinel{height:1px}
+.loading{text-align:center;color:var(--muted);font-size:13px;padding-block:12px}
+.endcard{margin-top:22px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px}
+.endcard .dated{font-family:var(--story);color:var(--muted);font-size:15px}
+.endcard .next{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:10px 12px;cursor:pointer}
+.endcard .next span{font-size:12px;color:var(--accent)}
+.endcard .next b{font-family:var(--story);font-weight:400;font-size:19px}
+
+/* ---------- overlays ---------- */
+.back{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:var(--scrim);padding:16px}
+.back .card{background:var(--surface);border-radius:18px;padding:20px;max-width:380px;width:100%;display:flex;flex-direction:column;gap:10px}
+.back h2{font-family:var(--story);font-weight:400;font-size:22px;margin:0}
+.back p{margin:0 0 4px;color:var(--muted);font-size:14px}
+.choice{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;width:100%;
+  border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;cursor:pointer}
+.choice:hover{border-color:var(--accent)}
+.choice b{font-weight:600;font-size:15px}
+.choice span{font-family:var(--story);font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.choice.primary{border-color:var(--accent);background:var(--accent-soft)}
+.choice.ear b{color:var(--mark)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;
+  background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);color:var(--ink);
+  border-radius:18px 18px 0 0;max-height:86%;display:flex;flex-direction:column;
+  padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 30px rgba(0,0,0,.18)}
+.sheet .inner{max-width:560px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:12px;min-height:0;overflow:auto}
+.sheet h2{margin:0;font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.quote{font-family:var(--story);font-size:17px;line-height:1.7;background:var(--bg);border-radius:10px;padding:10px 12px;white-space:pre-line}
+.words{display:flex;flex-wrap:wrap;gap:6px}
+.w{font-family:var(--story);font-size:16px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;cursor:pointer}
+.w:hover,.w.on{border-color:var(--accent);background:var(--accent-soft)}
+.rowx{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:0;background:var(--accent);color:var(--surface);border-radius:10px;padding:9px 14px;font-weight:500;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+a.btn{text-decoration:none;display:inline-block;font-size:14px}
+.askrow{display:flex;gap:8px}
+.askrow input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:9px 12px;font:inherit}
+.elsewhere{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
+.answer{white-space:pre-wrap;font-size:15px;line-height:1.65;border-left:3px solid var(--accent);padding:4px 0 4px 12px;min-height:1.5em}
+.answer .lbl{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.note{font-size:13px;color:var(--muted)}
+.set label{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:8px;border-bottom:1px solid var(--line)}
+.set select{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <!-- LIBRARY -->
+  <section id="libView">
+    <header class="top">
+      <div class="head-main"><p class="brand">bongBoi<small>রবীন্দ্রনাথের গল্প</small></p></div>
+      <button class="iconbtn" data-open-settings type="button">Settings</button>
+    </header>
+    <div id="library">
+      <div id="shelfBox" hidden>
+        <h2 class="shelfh">Continue reading</h2>
+        <div class="shelf" id="shelf"></div>
+      </div>
+      <input class="search" id="search" type="search" placeholder="Search: kabuliwala, chuti, কাবুলিওয়ালা" aria-label="Search stories">
+      <div id="vols"><p class="empty">Loading stories…</p></div>
+      <p class="src">Texts from Bengali Wikisource (public domain), split into short posts.</p>
+    </div>
+  </section>
+
+  <!-- READER -->
+  <section id="readView" hidden>
+    <header class="top">
+      <button class="iconbtn" id="backBtn" type="button" aria-label="Back to library">‹ গল্প</button>
+      <div class="head-main">
+        <h1 id="rTitle"></h1>
+        <div class="bar"><i id="bar"></i></div>
+      </div>
+      <span class="prog" id="prog"></span>
+      <button class="iconbtn" data-open-settings type="button" aria-label="Settings">⚙</button>
+    </header>
+    <div id="reader">
+      <p class="intro">Scroll to read. Tap a post to ask what a word or line means.</p>
+      <div class="feed" id="feed"></div>
+      <div class="sentinel" id="sentinel"></div>
+      <div class="loading" id="loading" hidden>Loading more…</div>
+      <div class="endcard" id="endCard" hidden>
+        <span class="dated" id="endDated"></span>
+        <button class="next" id="nextBtn" type="button" hidden><span>Next story</span><b id="nextTitle"></b></button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="back" id="back" hidden>
+  <div class="card" role="dialog" aria-labelledby="backHead">
+    <h2 id="backHead">আবার স্বাগত</h2>
+    <p>Where would you like to start?</p>
+    <button class="choice primary" id="goLast" type="button" hidden><b id="goLastB"></b><span id="goLastS"></span></button>
+    <button class="choice ear" id="goEar" type="button" hidden><b id="goEarB"></b><span id="goEarS"></span></button>
+    <button class="choice" id="goStart" type="button"><b>Start from the beginning</b><span id="goStartS"></span></button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<div class="scrim" id="scrim" hidden></div>
+
+<section class="sheet" id="askSheet" hidden aria-label="Ask about this post">
+  <div class="inner">
+    <div class="rowx" style="justify-content:space-between">
+      <h2 id="askHead">Post</h2>
+      <button class="iconbtn" data-close type="button">Close</button>
+    </div>
+    <div class="quote" id="askQuote"></div>
+    <div>
+      <div class="note" style="margin-bottom:6px">Tap a word to get its meaning</div>
+      <div class="words" id="askWords"></div>
+      <div class="rowx" style="margin-top:12px"><button class="btn" id="explainPost" type="button">Explain this post</button></div>
+      <div class="askrow" style="margin-top:10px">
+        <input id="askInput" type="text" placeholder="Ask your own question">
+        <button class="btn ghost" id="askGo" type="button">Ask</button>
+      </div>
+    </div>
+    <div class="elsewhere">
+      <span class="note" id="elseLbl">Or ask in your own app</span>
+      <div class="rowx">
+        <a class="btn ghost" id="toGPT" href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT ↗</a>
+        <a class="btn ghost" id="toClaude" href="https://claude.ai/new" target="_blank" rel="noopener">Claude ↗</a>
+      </div>
+    </div>
+    <div class="answer" id="answer" hidden></div>
+    <div class="rowx" id="stopRow" hidden><button class="iconbtn" id="stopBtn" type="button">Stop</button></div>
+    <p class="note" id="aiNote" hidden></p>
+  </div>
+</section>
+
+<section class="sheet set" id="setSheet" hidden aria-label="Settings">
+  <div class="inner">
+    <div class="rowx" style="justify-content:space-between">
+      <h2>Settings</h2>
+      <button class="iconbtn" data-close type="button">Close</button>
+    </div>
+    <label for="focusMode">Focus
+      <select id="focusMode"><option value="blur">Blur and fade</option><option value="dim">Fade only</option><option value="off">Off</option></select>
+    </label>
+    <label for="lang">Explain in
+      <select id="lang"><option value="English">English</option><option value="Bengali">বাংলা</option></select>
+    </label>
+    <label for="size">Text size
+      <select id="size"><option value="17px">Small</option><option value="19px">Medium</option><option value="22px">Large</option></select>
+    </label>
+    <label for="theme">Theme
+      <select id="theme"><option value="">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
+    </label>
+  </div>
+</section>
+
+<script>
+const $ = q => document.querySelector(q);
+const bn = n => String(n).replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+const VOL = t => (t || "").replace(/^গল্পগুচ্ছ\s*\(|\)$/g, "") || "অন্যান্য";
+
+// ---------- storage (this browser only) ----------
+const store = { get(k,d){ try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } },
+                set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
+                del(k){ try{ localStorage.removeItem(k); }catch(e){} } };
+const kLast = id => "bb.last." + id, kEar = id => "bb.ear." + id, kDone = id => "bb.done." + id;
+const num = k => parseInt(store.get(k,"0"),10) || 0;
+
+// ---------- settings ----------
+const S = { lang: store.get("sr.lang","English"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur") };
+function applySettings(){
+  const r = document.documentElement;
+  r.style.setProperty("--fs", S.size);
+  if (S.theme) r.setAttribute("data-theme", S.theme); else r.removeAttribute("data-theme");
+  document.body.classList.toggle("f-blur", S.focusMode === "blur");
+  document.body.classList.toggle("f-dim", S.focusMode === "dim");
+  for (const k of ["lang","size","theme","focusMode"]) $("#"+k).value = S[k];
+}
+for (const k of ["lang","size","theme","focusMode"]) $("#"+k).addEventListener("change", e => {
+  S[k] = e.target.value; store.set(k === "focusMode" ? "sr.focus" : "sr."+k, S[k]); applySettings(); updateFocus();
+});
+
+// ---------- search: Bengali or English letters ----------
+// Titles are turned into rough English letters, then both sides are reduced to a consonant
+// "skeleton", so kabuliwala / cabuliwalla / কাবুলিওয়ালা all match.
+const BN = {"অ":"o","আ":"a","ই":"i","ঈ":"i","উ":"u","ঊ":"u","ঋ":"ri","এ":"e","ঐ":"oi","ও":"o","ঔ":"ou",
+  "া":"a","ি":"i","ী":"i","ু":"u","ূ":"u","ৃ":"ri","ে":"e","ৈ":"oi","ো":"o","ৌ":"ou",
+  "ক":"k","খ":"kh","গ":"g","ঘ":"gh","ঙ":"ng","চ":"ch","ছ":"chh","জ":"j","ঝ":"jh","ঞ":"n","ট":"t","ঠ":"th","ড":"d","ঢ":"dh","ণ":"n",
+  "ত":"t","থ":"th","দ":"d","ধ":"dh","ন":"n","প":"p","ফ":"ph","ব":"b","ভ":"bh","ম":"m","য":"j","র":"r","ল":"l",
+  "শ":"sh","ষ":"sh","স":"s","হ":"h","ড়":"r","ঢ়":"r","য়":"y","ৎ":"t","ং":"ng","ঃ":"","ঁ":"","্":""};
+function toLatin(s){
+  s = s.replace(/ড়/g,"ড়").replace(/ঢ়/g,"ঢ়").replace(/য়/g,"য়");
+  let out = ""; for (const ch of s) out += (ch in BN) ? BN[ch] : ch;
+  return out;
+}
+function skeleton(s){
+  return toLatin(s).toLowerCase().replace(/c(?!h)/g,"k")
+    .replace(/chh|ch/g,"c").replace(/sh/g,"s").replace(/ph/g,"f").replace(/bh|v/g,"b").replace(/kh|q/g,"k")
+    .replace(/gh/g,"g").replace(/th/g,"t").replace(/dh/g,"d").replace(/jh|z/g,"j").replace(/ng/g,"n").replace(/x/g,"ks")
+    .replace(/[^a-z]/g,"").replace(/[aeiouywh]/g,"").replace(/(.)\1+/g,"$1");
+}
+function matches(s, q){
+  if (!q) return true;
+  s._score = 3;
+  if (s.title.includes(q)){ s._score = s.title.startsWith(q) ? 0 : 1; return true; }
+  const k = skeleton(q); if (k.length < 2) return toLatin(s.title).toLowerCase().includes(q.toLowerCase());
+  s._sk = s._sk || skeleton(s.title);
+  if (!s._sk.includes(k)) return false;
+  s._score = s._sk === k ? 0 : s._sk.startsWith(k) ? 1 : 2;
+  return true;
+}
+
+// ---------- library ----------
+let CATALOG = [];
+async function loadCatalog(){
+  try {
+    const r = await fetch("stories/catalog.json"); if (!r.ok) throw new Error(r.status);
+    CATALOG = (await r.json()).stories;
+  } catch(e){
+    $("#vols").innerHTML = ""; const p = document.createElement("p"); p.className = "empty";
+    p.textContent = "Couldn't load the story list. Check your connection and reload."; $("#vols").append(p); return false;
+  }
+  return true;
+}
+function renderLibrary(){
+  const q = $("#search").value.trim();
+  const vols = $("#vols"); vols.textContent = "";
+  const groups = new Map();
+  const hits = CATALOG.filter(s => matches(s, q));
+  if (q){ hits.sort((a,b) => a._score - b._score); if (hits.length) groups.set("", hits); }
+  else for (const s of hits){ const v = VOL(s.collection); if (!groups.has(v)) groups.set(v, []); groups.get(v).push(s); }
+  if (!groups.size){ const p = document.createElement("p"); p.className = "empty"; p.textContent = "No story matches “" + q + "”."; vols.append(p); }
+  for (const [v, list] of groups){
+    const sec = document.createElement("div"); sec.className = "vol";
+    const h = document.createElement("h2"); h.textContent = v ? "গল্পগুচ্ছ · " + v + " · " + bn(list.length) + "টি গল্প" : bn(list.length) + "টি গল্প মিলেছে";
+    const box = document.createElement("div"); box.className = "list";
+    for (const s of list){
+      const b = document.createElement("button"); b.type = "button"; b.className = "row";
+      const t = document.createElement("span"); t.className = "t"; t.textContent = s.title;
+      const m = document.createElement("span"); m.className = "m";
+      const last = num(kLast(s.id)), done = store.get(kDone(s.id), "") === "1";
+      m.textContent = done ? "পড়া হয়েছে" : last > 1 ? bn(Math.round(last / s.posts * 100)) + "%" : bn(s.posts) + " পোস্ট";
+      if (done) m.classList.add("done");
+      b.append(t, m);
+      if (last > 1 && !done){ const mini = document.createElement("span"); mini.className = "mini"; const i = document.createElement("i"); i.style.width = (last / s.posts * 100) + "%"; mini.append(i); b.append(mini); }
+      b.onclick = () => openStory(s.id);
+      box.append(b);
+    }
+    sec.append(h, box); vols.append(sec);
+  }
+  renderShelf(q);
+}
+
+// ---------- continue-reading shelf ----------
+function getShelf(){
+  let ids; try { ids = JSON.parse(store.get("bb.shelf", "null")); } catch(e){ ids = null; }
+  if (!Array.isArray(ids)){ const r = store.get("bb.recent", ""); ids = r ? [r] : []; }
+  return ids.filter(id => CATALOG.some(s => s.id === id));
+}
+const setShelf = ids => store.set("bb.shelf", JSON.stringify(ids));
+function shelfAdd(id){ setShelf([id, ...getShelf().filter(x => x !== id)]); }
+function renderShelf(q){
+  const shelf = $("#shelf"); shelf.textContent = "";
+  const ids = getShelf().filter(id => store.get(kDone(id), "") !== "1");
+  $("#shelfBox").hidden = !!q || !ids.length;
+  for (const id of ids){
+    const s = CATALOG.find(x => x.id === id), last = num(kLast(id));
+    const card = document.createElement("div"); card.className = "scard";
+    const open = document.createElement("button"); open.type = "button"; open.className = "open";
+    const t = document.createElement("span"); t.className = "t"; t.textContent = s.title;
+    const sn = document.createElement("span"); sn.className = "snip";
+    sn.textContent = last > 1 ? bn(last) + " / " + bn(s.posts) + " · " + bn(Math.round(last / s.posts * 100)) + "%" : "শুরু হয়নি";
+    const bar = document.createElement("span"); bar.className = "bar"; const i = document.createElement("i"); i.style.width = (last / s.posts * 100) + "%"; bar.append(i);
+    open.append(t, sn, bar); open.onclick = () => openStory(id);
+    const x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "×";
+    x.setAttribute("aria-label", "Remove " + s.title + " from Continue reading");
+    x.onclick = () => {
+      const before = getShelf();
+      setShelf(before.filter(v => v !== id)); renderShelf("");
+      toast("Removed " + s.title, "Undo", () => { setShelf(before); renderShelf(""); });
+    };
+    card.append(open, x); shelf.append(card);
+  }
+}
+$("#search").addEventListener("input", renderLibrary);
+
+// ---------- reader ----------
+let STORY = null, ITEMS = [], READ = [], TOTAL = 0, rendered = 0, earmark = 0, focusN = 0, started = false;
+const BATCH = 12, feed = $("#feed");
+
+async function openStory(id){
+  if (location.hash !== "#" + id){ location.hash = id; return; } // hashchange calls back in
+  const meta = CATALOG.find(s => s.id === id); if (!meta){ location.hash = ""; return; }
+  let data;
+  try { const r = await fetch("stories/" + meta.file); if (!r.ok) throw 0; data = await r.json(); }
+  catch(e){ toast("Couldn't open this story. Try again."); location.hash = ""; return; }
+  STORY = data; ITEMS = data.items;
+  READ = []; ITEMS.forEach(it => { if (it.t){ it.n = READ.length + 1; it.dialogue = /“/.test(it.t); READ.push(it); } });
+  TOTAL = READ.length; rendered = 0; focusN = 0; started = false;
+  earmark = num(kEar(id));
+  shelfAdd(id);
+  $("#rTitle").textContent = data.title;
+  feed.textContent = ""; $("#endCard").hidden = true; $("#bar").style.width = "0";
+  $("#libView").hidden = true; $("#readView").hidden = false;
+  document.title = data.title + " · bongBoi";
+  renderMore();
+  scrollTo(0,0);
+  welcome();
+}
+function showLibrary(){
+  closeSheets(); $("#back").hidden = true;
+  STORY = null; $("#readView").hidden = true; $("#libView").hidden = false; document.title = "bongBoi";
+  renderLibrary(); scrollTo(0,0);
+}
+$("#backBtn").onclick = () => { location.hash = ""; };
+addEventListener("hashchange", route);
+function route(){
+  const id = location.hash.slice(1);
+  if (id && CATALOG.some(s => s.id === id)) openStory(id); else showLibrary();
+}
+
+function makePost(p){
+  const d = document.createElement("article");
+  d.className = "post" + (p.dialogue ? " dialogue" : "") + (p.n === earmark ? " marked" : "");
+  d.dataset.n = p.n; d.id = "p" + p.n;
+  const t = document.createElement("p"); t.className = "txt"; t.textContent = p.t;
+  const m = document.createElement("div"); m.className = "meta";
+  const n = document.createElement("span"); n.className = "n"; n.textContent = bn(p.n) + " / " + bn(TOTAL);
+  const ear = document.createElement("button"); ear.type = "button"; ear.className = "ear";
+  ear.textContent = p.n === earmark ? "Earmarked" : "Earmark"; ear.setAttribute("aria-pressed", p.n === earmark ? "true" : "false");
+  ear.addEventListener("click", e => { e.stopPropagation(); toggleEar(p.n); });
+  const ask = document.createElement("button"); ask.type = "button"; ask.textContent = "Ask";
+  ask.addEventListener("click", e => { e.stopPropagation(); openAsk(p); });
+  m.append(n, ear, ask); d.append(t, m);
+  d.addEventListener("click", () => { if (!getSelection().toString()) openAsk(p); });
+  return d;
+}
+function renderMore(count = BATCH){
+  if (!STORY) return;
+  let added = 0;
+  while (rendered < ITEMS.length && added < count){
+    const it = ITEMS[rendered++];
+    if (it.brk){ if (feed.lastElementChild && !feed.lastElementChild.classList.contains("brk")){ const b = document.createElement("div"); b.className = "brk"; b.textContent = "· · ·"; feed.append(b); } continue; }
+    feed.append(makePost(it)); added++;
+  }
+  const done = rendered >= ITEMS.length;
+  $("#loading").hidden = done;
+  if (done && $("#endCard").hidden) showEnd();
+  updateFocus();
+}
+function renderThrough(n){ while (!document.getElementById("p" + n) && rendered < ITEMS.length) renderMore(); renderMore(4); }
+new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) renderMore(); }, {rootMargin:"600px 0px"}).observe($("#sentinel"));
+
+function showEnd(){
+  $("#endCard").hidden = false;
+  $("#endDated").textContent = (STORY.dated ? STORY.dated + " · " : "") + "গল্প শেষ";
+  const i = CATALOG.findIndex(s => s.id === STORY.id), nx = CATALOG[i + 1];
+  $("#nextBtn").hidden = !nx;
+  if (nx){ $("#nextTitle").textContent = nx.title; $("#nextBtn").onclick = () => openStory(nx.id); }
+}
+
+let raf = 0;
+function updateFocus(){
+  if (!STORY) return;
+  // The focus line starts just under the header and slides down to mid-screen as you scroll,
+  // so the first posts can take focus even though they never reach the centre.
+  const hb = $("#readView header.top").getBoundingClientRect().bottom;
+  const mid = Math.min(innerHeight / 2, hb + 60 + scrollY); let best = null, bestD = Infinity;
+  for (const el of feed.querySelectorAll(".post")){
+    const r = el.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) continue;
+    const d = r.top <= mid && r.bottom >= mid ? 0 : Math.min(Math.abs(r.top - mid), Math.abs(r.bottom - mid));
+    if (d < bestD){ bestD = d; best = el; }
+  }
+  if (!best) return;
+  const n = +best.dataset.n;
+  if (n !== focusN){
+    feed.querySelector(".post.focus")?.classList.remove("focus");
+    best.classList.add("focus"); focusN = n;
+    $("#prog").textContent = bn(n) + "/" + bn(TOTAL);
+    $("#bar").style.width = (n / TOTAL * 100) + "%";
+    if (started){
+      store.set(kLast(STORY.id), String(n));
+      if (n >= TOTAL) store.set(kDone(STORY.id), "1");
+    }
+  }
+}
+addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; updateFocus(); }); }, {passive:true});
+addEventListener("resize", updateFocus);
+function goTo(n){ renderThrough(n); document.getElementById("p" + n)?.scrollIntoView({block:"center"}); updateFocus(); }
+
+// ---------- earmark ----------
+function toggleEar(n){
+  const old = earmark; earmark = old === n ? 0 : n;
+  if (earmark) store.set(kEar(STORY.id), String(earmark)); else store.del(kEar(STORY.id));
+  for (const k of [old, earmark]){
+    const el = k && document.getElementById("p" + k); if (!el) continue;
+    const on = k === earmark; el.classList.toggle("marked", on);
+    const b = el.querySelector(".ear"); b.textContent = on ? "Earmarked" : "Earmark"; b.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  toast(earmark ? "Earmarked post " + bn(earmark) : "Earmark removed");
+}
+let tt = 0;
+function toast(msg, actionLabel, action){
+  const t = $("#toast"); t.textContent = msg;
+  if (actionLabel){ const b = document.createElement("button"); b.type = "button"; b.textContent = actionLabel;
+    b.onclick = () => { t.hidden = true; action(); }; t.append(b); }
+  t.hidden = false; clearTimeout(tt); tt = setTimeout(() => t.hidden = true, actionLabel ? 4000 : 1800);
+}
+
+// ---------- welcome back ----------
+const snippet = n => (READ[n-1]?.t || "").replace(/\n/g, " ").slice(0, 60) + "…";
+function start(n){
+  $("#back").hidden = true; started = true;
+  store.del(kDone(STORY.id));
+  if (n > 1) goTo(n); else { scrollTo(0,0); focusN = 0; updateFocus(); }
+  store.set(kLast(STORY.id), String(focusN || 1));
+}
+function welcome(){
+  const last = num(kLast(STORY.id));
+  const hasLast = last > 1 && last <= TOTAL, hasEar = earmark > 0 && earmark <= TOTAL;
+  if (!hasLast && !hasEar){ start(1); return; }
+  $("#goLast").hidden = !hasLast; $("#goEar").hidden = !(hasEar && earmark !== last);
+  if (hasLast){ $("#goLastB").textContent = "Continue from where you stopped · post " + bn(last); $("#goLastS").textContent = snippet(last); $("#goLast").onclick = () => start(last); }
+  if (hasEar){ $("#goEarB").textContent = "Go to your earmark · post " + bn(earmark); $("#goEarS").textContent = snippet(earmark); $("#goEar").onclick = () => start(earmark); }
+  $("#goStartS").textContent = snippet(1);
+  $("#goStart").onclick = () => start(1);
+  $("#back").hidden = false;
+  ($("#goLast").hidden ? ($("#goEar").hidden ? $("#goStart") : $("#goEar")) : $("#goLast")).focus();
+}
+
+// ---------- sheets ----------
+function openSheet(id){ $("#scrim").hidden = false; $(id).hidden = false; }
+function closeSheets(){ ctl?.abort(); $("#scrim").hidden = true; $("#askSheet").hidden = true; $("#setSheet").hidden = true; }
+$("#scrim").onclick = closeSheets;
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
+document.querySelectorAll("[data-open-settings]").forEach(b => b.onclick = () => openSheet("#setSheet"));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheets(); });
+
+// ---------- asking ----------
+let sample = null, ctl = null, current = null, selWord = "";
+const aiReady = (window.claude?.use ? window.claude.use("sample") : Promise.resolve(null)).then(s => { sample = s; return s; }).catch(() => null);
+
+function openAsk(p){
+  current = p; selWord = "";
+  $("#askHead").textContent = "Post " + bn(p.n);
+  $("#askQuote").textContent = p.t;
+  const words = $("#askWords"); words.textContent = "";
+  const seen = new Set();
+  for (const raw of p.t.split(/\s+/)){
+    const w = raw.replace(/^[“‘'(—]+|[”’'),;।?!—:]+$/g, "");
+    if (!w || w.length < 2 || seen.has(w)) continue; seen.add(w);
+    const b = document.createElement("button"); b.type = "button"; b.className = "w"; b.textContent = w;
+    b.onclick = () => {
+      const was = b.classList.contains("on");
+      words.querySelectorAll(".on").forEach(x => x.classList.remove("on"));
+      if (was && !sample) selWord = ""; else { b.classList.add("on"); selWord = w; }
+      updateLinks(); if (sample) ask("word", w);
+    };
+    words.append(b);
+  }
+  $("#explainPost").disabled = false; $("#askGo").disabled = false;
+  $("#answer").hidden = true; $("#answer").textContent = ""; $("#aiNote").hidden = true; $("#askInput").value = "";
+  updateLinks(); openSheet("#askSheet");
+  aiReady.then(s => { if (!s) showUnavailable(); });
+}
+function showUnavailable(){
+  $("#explainPost").disabled = true; $("#askGo").disabled = true;
+  const n = $("#aiNote"); n.hidden = false; n.textContent = "Built-in explanations aren't available here. Pick a word or type a question, then use ChatGPT or Claude below.";
+}
+function context(p){
+  const prev = READ[p.n - 2]?.t || "", next = READ[p.n]?.t || "";
+  return `Story: "${STORY.title}" by ${STORY.author} (Bengali, sadhu or chalit bhasha${STORY.dated ? ", written " + STORY.dated : ""}).\nPrevious post: ${prev}\nThis post: ${p.t}\nNext post: ${next}`;
+}
+function prompt(kind, arg){
+  const lang = S.lang === "Bengali" ? "simple modern spoken Bengali (চলিত ভাষা), in Bengali script" : "simple English";
+  const base = `You help an adult reader enjoy a classic Bengali story. Answer in ${lang}. Plain text only, no markdown, no headings. Be brief and warm, like a well-read friend.\n\n${context(current)}\n\n`;
+  if (kind === "word") return base + `Explain the word "${arg}" as used in this post: its meaning here, its everyday (chalit) form if it is sadhu bhasha, and one line on why it fits. At most 4 short lines.`;
+  if (kind === "post") return base + `Explain this post: first retell it in plain modern language, then note anything a modern reader might miss (old words, customs, humour, tone). At most 7 short lines.`;
+  return base + `The reader asks: ${arg}\nAnswer about this post. If the question needs more of the story, say what you can from the post and context. At most 7 short lines.`;
+}
+function linkPrompt(){
+  const lang = S.lang === "Bengali" ? "Answer in simple modern Bengali (চলিত ভাষা)." : "Answer in simple English.";
+  const q = $("#askInput").value.trim();
+  const head = `I'm reading Tagore's story "${STORY.title}". This line: "${current.t.replace(/\n/g, " / ")}"`;
+  if (q) return `${head}\nMy question: ${q}\n${lang} Keep it short.`;
+  if (selWord) return `${head}\nWhat does "${selWord}" mean here? Give its everyday (chalit) form too. ${lang} Keep it short.`;
+  return `${head}\nRetell it in plain modern language and explain anything a modern reader might miss. ${lang} Keep it short.`;
+}
+function updateLinks(){
+  if (!current) return;
+  const p = encodeURIComponent(linkPrompt());
+  $("#toGPT").href = "https://chatgpt.com/?q=" + p;
+  $("#toClaude").href = "https://claude.ai/new?q=" + p;
+  const q = $("#askInput").value.trim();
+  $("#elseLbl").textContent = q ? "Or ask your question in your own app" : selWord ? `Or ask about “${selWord}” in your own app` : "Or get this post explained in your own app";
+}
+$("#askInput").addEventListener("input", updateLinks);
+const ERR = { rate_limited:"Too many questions at once. Wait a minute, then ask again.", session_expired:"You've been signed out. Sign in again, then ask.",
+  refused:"Claude couldn't answer that. Try asking it a different way.", empty_completion:"No answer came back. Try a shorter question." };
+async function ask(kind, arg){
+  const s = await aiReady; if (!s) return showUnavailable();
+  ctl?.abort(); ctl = new AbortController();
+  const out = $("#answer"); out.hidden = false; out.textContent = "";
+  const lbl = document.createElement("span"); lbl.className = "lbl";
+  lbl.textContent = kind === "word" ? "Meaning of " + arg : kind === "post" ? "This post, explained" : "Your question";
+  const body = document.createElement("span"); body.textContent = "Thinking…"; out.append(lbl, body);
+  $("#stopRow").hidden = false; $("#aiNote").hidden = true;
+  try {
+    const r = await s(prompt(kind, arg), { signal: ctl.signal, modelTier: kind === "word" ? "quick" : "default",
+      cache: kind === "free" ? false : true, onText: ({text}) => { body.textContent = text; } });
+    if (r.truncated){ $("#aiNote").hidden = false; $("#aiNote").textContent = "The answer was cut short."; }
+  } catch(e){
+    body.textContent = e?.text || "";
+    if (e?.code && e.code !== "cancelled"){
+      if (["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e.code)) showUnavailable();
+      else { $("#aiNote").hidden = false; $("#aiNote").textContent = ERR[e.code] || "Something went wrong. Try again in a moment."; }
+    }
+    if (!body.textContent) out.hidden = e?.code === "cancelled";
+  } finally { $("#stopRow").hidden = true; }
+}
+$("#explainPost").onclick = () => ask("post");
+$("#askGo").onclick = () => { const q = $("#askInput").value.trim(); if (q) ask("free", q); };
+$("#askInput").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("#askGo").click(); } });
+$("#stopBtn").onclick = () => ctl?.abort();
+
+// ---------- boot ----------
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+applySettings();
+loadCatalog().then(ok => { if (ok) route(); });
+// Offline support when hosted on its own (e.g. GitHub Pages). Harmless where not allowed.
+if ("serviceWorker" in navigator && location.protocol === "https:" && !window.claude){
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>

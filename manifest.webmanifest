@@ -1,0 +1,17 @@
+{
+  "name": "bongBoi",
+  "short_name": "bongBoi",
+  "description": "Tagore's stories as a feed of short posts",
+  "lang": "bn",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EDF1F5",
+  "theme_color": "#2E5A88",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

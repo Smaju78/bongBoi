@@ -125,6 +125,28 @@ body.f-blur .post.marked.focus,body.f-dim .post.marked.focus{border-color:var(--
 .endcard .next span{font-size:12px;color:var(--accent)}
 .endcard .next b{font-family:var(--story);font-weight:400;font-size:19px}
 
+/* ---------- page mode ---------- */
+body.pagemode{overflow:hidden}
+body.pagemode #reader{display:none}
+.pview{position:fixed;left:0;right:0;top:var(--ptop,64px);bottom:calc(60px + env(safe-area-inset-bottom,0px));overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.pclip{position:absolute;top:18px;bottom:10px;overflow:hidden}
+.pcols{height:100%;column-fill:auto;transition:transform .28s ease}
+.pcols .pp{font-family:var(--story);font-size:var(--fs);line-height:1.7;margin:0 0 .55em;text-indent:1.3em;text-wrap:pretty;white-space:pre-line;cursor:pointer;border-radius:4px}
+.pcols .pp.marked{background:var(--mark-soft);box-shadow:-6px 0 0 var(--mark-soft),6px 0 0 var(--mark-soft)}
+.pcols .pbrk{text-align:center;color:var(--muted);letter-spacing:.5em;margin:.4em 0 .8em;font-size:13px}
+.pcols .ptitle{break-inside:avoid;margin:0 0 1.2em;text-align:center}
+.pcols .ptitle h2{font-family:var(--story);font-weight:400;font-size:calc(var(--fs) * 1.5);margin:0;line-height:1.3}
+.pcols .ptitle p{margin:.3em 0 0;color:var(--muted);font-size:14px}
+.pcols .pend{break-inside:avoid;margin-top:1.4em;padding-top:1em;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.pcols .pend .dated{font-family:var(--story);color:var(--muted)}
+.pbar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--bg);border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px))}
+.pbar .pnav{font-size:20px;line-height:1;padding:6px 14px}
+.pmid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:0}
+.pmid input{width:100%;accent-color:var(--mark)}
+.pmid span{font-size:12px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+#pEar[aria-pressed="true"]{color:var(--mark);border-color:var(--mark);font-weight:600}
+
 /* ---------- overlays ---------- */
 .back{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:var(--scrim);padding:16px}
 .back .card{background:var(--surface);border-radius:18px;padding:20px;max-width:380px;width:100%;display:flex;flex-direction:column;gap:10px}
@@ -213,6 +235,16 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
   </section>
 </div>
 
+<div id="pager" hidden>
+  <div class="pview" id="pview"><div class="pclip" id="pclip"><div class="pcols" id="pcols"></div></div></div>
+  <div class="pbar">
+    <button class="iconbtn pnav" id="pPrev" type="button" aria-label="Previous page">‹</button>
+    <div class="pmid"><input type="range" id="pSlider" min="1" max="1" value="1" aria-label="Go to page"><span id="pNum"></span></div>
+    <button class="iconbtn" id="pEar" type="button">Earmark</button>
+    <button class="iconbtn pnav" id="pNext" type="button" aria-label="Next page">›</button>
+  </div>
+</div>
+
 <div class="back" id="back" hidden>
   <div class="card" role="dialog" aria-labelledby="backHead">
     <h2 id="backHead">আবার স্বাগত</h2>
@@ -261,6 +293,9 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
       <h2>Settings</h2>
       <button class="iconbtn" data-close type="button">Close</button>
     </div>
+    <label for="mode">Reading mode
+      <select id="mode"><option value="feed">Feed (scroll)</option><option value="pages">Pages (turn)</option></select>
+    </label>
     <label for="focusMode">Focus
       <select id="focusMode"><option value="blur">Blur and fade</option><option value="dim">Fade only</option><option value="off">Off</option></select>
     </label>
@@ -289,17 +324,19 @@ const kLast = id => "bb.last." + id, kEar = id => "bb.ear." + id, kDone = id => 
 const num = k => parseInt(store.get(k,"0"),10) || 0;
 
 // ---------- settings ----------
-const S = { lang: store.get("sr.lang","English"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur") };
+const S = { mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","English"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur") };
 function applySettings(){
   const r = document.documentElement;
   r.style.setProperty("--fs", S.size);
   if (S.theme) r.setAttribute("data-theme", S.theme); else r.removeAttribute("data-theme");
   document.body.classList.toggle("f-blur", S.focusMode === "blur");
   document.body.classList.toggle("f-dim", S.focusMode === "dim");
-  for (const k of ["lang","size","theme","focusMode"]) $("#"+k).value = S[k];
+  for (const k of ["mode","lang","size","theme","focusMode"]) $("#"+k).value = S[k];
 }
-for (const k of ["lang","size","theme","focusMode"]) $("#"+k).addEventListener("change", e => {
-  S[k] = e.target.value; store.set(k === "focusMode" ? "sr.focus" : "sr."+k, S[k]); applySettings(); updateFocus();
+for (const k of ["mode","lang","size","theme","focusMode"]) $("#"+k).addEventListener("change", e => {
+  const here = STORY ? currentPost() : 1;
+  S[k] = e.target.value; store.set(k === "focusMode" ? "sr.focus" : "sr."+k, S[k]); applySettings();
+  if (STORY && (k === "mode" || k === "size")) applyMode(here); else updateFocus();
 });
 
 // ---------- search: Bengali or English letters ----------
@@ -450,7 +487,7 @@ async function openStory(id){
   let data;
   try { const r = await fetch("stories/" + meta.file); if (!r.ok) throw 0; data = await r.json(); }
   catch(e){ toast("Couldn't open this story. Try again."); location.hash = ""; return; }
-  STORY = data; ITEMS = data.items;
+  STORY = data; ITEMS = data.items; PG.built = false;
   READ = []; ITEMS.forEach(it => { if (it.t){ it.n = READ.length + 1; it.dialogue = /“/.test(it.t); READ.push(it); } });
   TOTAL = READ.length; rendered = 0; focusN = 0; started = false;
   earmark = num(kEar(id));
@@ -461,11 +498,14 @@ async function openStory(id){
   document.title = data.title + " · bongBoi";
   renderMore();
   scrollTo(0,0);
+  if (S.mode === "pages") buildPages();
+  applyMode(0);
   welcome();
 }
 function showLibrary(){
   closeSheets(); $("#back").hidden = true;
   STORY = null; $("#readView").hidden = true; $("#libView").hidden = false; document.title = "bongBoi";
+  $("#pager").hidden = true; document.body.classList.remove("pagemode");
   renderLibrary(); scrollTo(0,0);
 }
 $("#backBtn").onclick = () => {
@@ -551,7 +591,106 @@ function updateFocus(){
 }
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; updateFocus(); }); }, {passive:true});
 addEventListener("resize", updateFocus);
-function goTo(n){ renderThrough(n); document.getElementById("p" + n)?.scrollIntoView({block:"center"}); updateFocus(); }
+function goTo(n){
+  if (S.mode === "pages"){ goPage(pageOfPost(n)); return; }
+  renderThrough(n); document.getElementById("p" + n)?.scrollIntoView({block:"center"}); updateFocus();
+}
+const currentPost = () => S.mode === "pages" ? firstPostOnPage(PG.page) : (focusN || 1);
+
+// ---------- page mode ----------
+const pcols = $("#pcols"), pclip = $("#pclip"), pview = $("#pview");
+const PG = { page: 0, pages: 1, w: 0, gap: 40, built: false };
+function buildPages(){
+  pcols.textContent = "";
+  const head = document.createElement("div"); head.className = "ptitle";
+  const h = document.createElement("h2"); h.textContent = STORY.title;
+  const a = document.createElement("p"); a.textContent = STORY.author; head.append(h, a); pcols.append(head);
+  for (const it of ITEMS){
+    if (it.brk){ const b = document.createElement("p"); b.className = "pbrk"; b.textContent = "· · ·"; pcols.append(b); continue; }
+    const p = document.createElement("p"); p.className = "pp" + (it.n === earmark ? " marked" : ""); p.dataset.n = it.n; p.textContent = it.t;
+    pcols.append(p);
+  }
+  const end = document.createElement("div"); end.className = "pend";
+  const d = document.createElement("span"); d.className = "dated"; d.textContent = (STORY.dated ? STORY.dated + " · " : "") + "গল্প শেষ";
+  end.append(d);
+  const i = CATALOG.findIndex(s => s.id === STORY.id), nx = CATALOG[i + 1] && CATALOG[i + 1].author === STORY.author ? CATALOG[i + 1] : null;
+  if (nx){ const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = "পরের গল্প: " + nx.title; b.onclick = () => openStory(nx.id); end.append(b); }
+  pcols.append(end);
+  PG.built = true;
+}
+function layoutPages(){
+  const hb = $("#readView header.top").getBoundingClientRect().bottom;
+  document.documentElement.style.setProperty("--ptop", Math.max(0, hb) + "px");
+  const vw = pview.clientWidth, w = Math.min(vw - 40, 600);
+  PG.w = Math.max(200, w);
+  pclip.style.left = Math.round((vw - PG.w) / 2) + "px"; pclip.style.width = PG.w + "px";
+  pcols.style.width = PG.w + "px"; pcols.style.columnWidth = PG.w + "px"; pcols.style.columnGap = PG.gap + "px";
+  PG.pages = Math.max(1, Math.round((pcols.scrollWidth + PG.gap) / (PG.w + PG.gap)));
+  $("#pSlider").max = PG.pages;
+}
+function pageOfPost(n){
+  const el = pcols.querySelector('.pp[data-n="' + n + '"]');
+  return el ? Math.floor((el.offsetLeft + 2) / (PG.w + PG.gap)) : 0;
+}
+function firstPostOnPage(p){
+  for (const el of pcols.querySelectorAll(".pp")) if (Math.floor((el.offsetLeft + 2) / (PG.w + PG.gap)) >= p) return +el.dataset.n;
+  return TOTAL || 1;
+}
+function goPage(p){
+  PG.page = Math.max(0, Math.min(PG.pages - 1, p));
+  pcols.style.transform = "translateX(" + (-PG.page * (PG.w + PG.gap)) + "px)";
+  $("#pNum").textContent = "পৃষ্ঠা " + bn(PG.page + 1) + " / " + bn(PG.pages);
+  $("#pSlider").value = PG.page + 1;
+  $("#prog").textContent = bn(PG.page + 1) + "/" + bn(PG.pages);
+  $("#bar").style.width = ((PG.page + 1) / PG.pages * 100) + "%";
+  const first = firstPostOnPage(PG.page);
+  const onPage = earmark && pageOfPost(earmark) === PG.page;
+  $("#pEar").textContent = onPage ? "Earmarked" : "Earmark"; $("#pEar").setAttribute("aria-pressed", onPage ? "true" : "false");
+  if (started){
+    store.set(kLast(STORY.id), String(first));
+    if (PG.page >= PG.pages - 1) store.set(kDone(STORY.id), "1");
+  }
+}
+function applyMode(n){
+  const on = S.mode === "pages" && !!STORY;
+  document.body.classList.toggle("pagemode", on);
+  $("#pager").hidden = !on;
+  if (on){
+    if (!PG.built) buildPages();
+    layoutPages(); goPage(n > 1 ? pageOfPost(n) : 0);
+  } else if (STORY && n > 1){ renderThrough(n); document.getElementById("p" + n)?.scrollIntoView({block:"center"}); updateFocus(); }
+}
+function relayout(){ if (S.mode !== "pages" || !STORY || $("#pager").hidden) return; const n = firstPostOnPage(PG.page); layoutPages(); goPage(pageOfPost(n)); }
+addEventListener("resize", () => { clearTimeout(relayout.t); relayout.t = setTimeout(relayout, 150); });
+document.fonts?.ready.then(relayout);
+
+$("#pPrev").onclick = () => goPage(PG.page - 1);
+$("#pNext").onclick = () => goPage(PG.page + 1);
+$("#pSlider").addEventListener("input", e => goPage(+e.target.value - 1));
+$("#pEar").onclick = () => {
+  const n = earmark && pageOfPost(earmark) === PG.page ? earmark : firstPostOnPage(PG.page);
+  toggleEar(n); goPage(PG.page);
+};
+// tap left edge = back, right edge = forward, middle = ask about that paragraph; swipe to turn
+let swipe = null;
+pview.addEventListener("pointerdown", e => { swipe = {x: e.clientX, y: e.clientY, t: Date.now()}; });
+pview.addEventListener("pointerup", e => {
+  if (!swipe) return;
+  if (e.target.closest?.("button")){ swipe = null; return; }
+  const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y; const moved = Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy);
+  swipe = null;
+  if (moved){ goPage(PG.page + (dx < 0 ? 1 : -1)); return; }
+  const r = pview.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
+  if (x < 0.25) return goPage(PG.page - 1);
+  if (x > 0.75) return goPage(PG.page + 1);
+  const el = e.target.closest?.(".pp"); if (el) openAsk(READ[+el.dataset.n - 1]);
+});
+document.addEventListener("keydown", e => {
+  if (S.mode !== "pages" || !STORY || !$("#askSheet").hidden || !$("#setSheet").hidden || !$("#back").hidden) return;
+  if (e.target.matches?.("input,select,textarea")) return;
+  if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); goPage(PG.page + 1); }
+  if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); goPage(PG.page - 1); }
+});
 
 // ---------- earmark ----------
 function toggleEar(n){
@@ -562,6 +701,8 @@ function toggleEar(n){
     const on = k === earmark; el.classList.toggle("marked", on);
     const b = el.querySelector(".ear"); b.textContent = on ? "Earmarked" : "Earmark"; b.setAttribute("aria-pressed", on ? "true" : "false");
   }
+  pcols.querySelectorAll(".pp.marked").forEach(x => x.classList.remove("marked"));
+  if (earmark) pcols.querySelector('.pp[data-n="' + earmark + '"]')?.classList.add("marked");
   toast(earmark ? "Earmarked post " + bn(earmark) : "Earmark removed");
 }
 let tt = 0;

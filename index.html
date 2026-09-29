@@ -87,23 +87,68 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .row .mini{grid-column:1/-1;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
 .row .mini i{display:block;height:100%;background:var(--mark)}
 .row .bl{grid-column:1/-1;font-size:13px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.today{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;cursor:pointer;border-radius:16px;padding:16px;
+.today{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;cursor:pointer;border-radius:16px;padding:14px 16px;
   background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--mark)}
 .today .eyebrow{font-size:12px;color:var(--mark);letter-spacing:.06em;font-weight:600}
-.today .tt{font-family:var(--story);font-size:26px;line-height:1.25}
+.today .tt{font-family:var(--story);font-size:22px;line-height:1.25}
 .today .ta{font-size:13px;color:var(--muted)}
-.today .tb{font-family:var(--story);font-size:16px;line-height:1.5;margin-top:4px}
+.today .tb{font-family:var(--story);font-size:15px;line-height:1.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .today .go{margin-top:8px;font-size:14px;color:var(--accent);font-weight:600}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer}
 .chip:hover{border-color:var(--accent);background:var(--accent-soft)}
 .chip.accent{border-color:var(--accent);color:var(--accent);font-weight:600}
 .row .by{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-2px}
-.row.author .t{font-size:19px}
-.authorhead{display:flex;align-items:center;gap:12px}
-.authorhead h1{font-family:var(--story);font-weight:400;font-size:24px;margin:0;line-height:1.2}
-.authorhead p{margin:0;color:var(--muted);font-size:13px}
-.empty{color:var(--muted);font-size:14px;padding:12px}
+.empty{color:var(--muted);font-size:14px;padding:12px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+
+/* home: shelf + today card scroll away; tabs and tag filter stick under the header */
+#homeTop{display:flex;flex-direction:column;gap:18px}
+#ctlAnchor{height:0;margin-bottom:-18px}
+.controls{position:sticky;top:calc(var(--hh,56px) + env(safe-area-inset-top,0px));z-index:4;background:var(--bg);
+  margin-inline:-16px;padding:10px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:3px}
+.tabs button{border:0;background:transparent;border-radius:9px;padding:7px;font-weight:500;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--surface)}
+.filters{display:flex;align-items:center;gap:8px;min-width:0}
+.tagbtn{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
+.tagbtn.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.pills{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{flex:none;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:5px 10px;font-size:13px;cursor:pointer;white-space:pre}
+.pill.mood{border-color:var(--mark);background:var(--mark-soft);color:var(--mark)}
+.hint{flex:1;min-width:0;border:0;background:transparent;padding:0;text-align:left;color:var(--muted);font-size:13px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#surpriseBtn{flex:none;font-size:16px;padding:4px 9px}
+.count{margin:-6px 0 -8px;font-size:13px;color:var(--muted)}
+.vol h2.letter{font-family:var(--story);font-weight:400;font-size:20px;color:var(--accent);margin:4px 0 6px;padding-left:4px;
+  scroll-margin-top:calc(var(--hh,56px) + var(--ch,96px) + 12px)}
+.tags{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.tag{font-size:11px;line-height:1.3;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.tag.mood{background:var(--mark-soft);color:var(--mark)}
+.tag.on{box-shadow:inset 0 0 0 1.5px currentColor;font-weight:600}
+.arow{grid-template-columns:auto 1fr auto;column-gap:12px}
+.arow .av{grid-row:span 2;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-family:var(--story);font-size:19px}
+.arow .t{font-size:19px}
+.arow .by{grid-column:2/-1}
+.az{position:fixed;right:max(0px, calc((100vw - 560px) / 2 - 30px));top:calc(var(--hh,56px) + var(--ch,96px) + 8px);bottom:12px;z-index:6;
+  display:flex;flex-direction:column;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.az span{display:grid;place-items:center;width:18px;height:min(20px, calc((100vh - var(--hh,56px) - var(--ch,96px) - 40px) / var(--n,20)));
+  font-size:min(12px, calc((100vh - var(--hh,56px) - var(--ch,96px) - 40px) / var(--n,20) * .8));color:var(--accent);font-weight:600;cursor:pointer}
+.az.off{opacity:0;pointer-events:none}
+.az{transition:opacity .2s}
+.azb{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:41;width:76px;height:76px;border-radius:18px;
+  background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:var(--story);font-size:38px;pointer-events:none;opacity:.9}
+/* tag picker */
+.tg h3{margin:6px 0 8px;font-size:13px;font-weight:600;color:var(--muted)}
+.tchips{display:flex;flex-wrap:wrap;gap:8px}
+.tchip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:14px;cursor:pointer;display:inline-flex;gap:6px;align-items:baseline}
+.tchip small{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tchip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.tchip.mood[aria-pressed="true"]{background:var(--mark);border-color:var(--mark)}
+.tchip[aria-pressed="true"] small{color:inherit;opacity:.85}
+.tchip:disabled{opacity:.4;cursor:default}
+.sfoot{display:flex;gap:10px;max-width:560px;width:100%;margin:12px auto 0;padding-top:12px;border-top:1px solid var(--line)}
+.sfoot .btn{padding:12px 14px}
+.sfoot #tagShow{flex:1}
 .src{font-size:12px;color:var(--muted)}
 
 /* ---------- reader ---------- */
@@ -207,29 +252,44 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
 <div class="wrap">
   <!-- LIBRARY -->
   <section id="libView">
-    <header class="top">
-      <div class="head-main"><p class="brand">bongBoi<small>বাংলা গল্প</small></p></div>
+    <header class="top" id="libHead">
+      <div class="head-main" id="brandBox"><p class="brand">bongBoi<small>Bengali stories</small></p></div>
+      <button class="iconbtn" id="authorBack" type="button" hidden>‹ Back</button>
+      <div class="head-main" id="authorBox" hidden><h1 id="authorName"></h1><p id="authorCount"></p></div>
       <button class="iconbtn" data-open-settings type="button">Settings</button>
     </header>
     <div id="library">
-      <div id="shelfBox" hidden>
-        <h2 class="shelfh">Continue reading</h2>
-        <div class="shelf" id="shelf"></div>
+      <div id="homeTop">
+        <div id="shelfBox" hidden>
+          <h2 class="shelfh">Continue reading</h2>
+          <div class="shelf" id="shelf"></div>
+        </div>
+        <div id="todayBox"></div>
       </div>
       <input class="search" id="search" type="search" placeholder="Search stories or authors: kabuliwala, sukumar" aria-label="Search stories or authors">
-      <div class="authorhead" id="authorHead" hidden>
-        <button class="iconbtn" id="allAuthors" type="button">‹ ফিরে যান</button>
-        <div><h1 id="authorName"></h1><p id="authorCount"></p></div>
+      <div id="ctlAnchor"></div>
+      <div class="controls" id="controls">
+        <div class="tabs" id="tabs" role="tablist">
+          <button type="button" role="tab" data-tab="authors">Authors</button>
+          <button type="button" role="tab" data-tab="stories">Stories</button>
+        </div>
+        <div class="filters">
+          <button class="tagbtn" id="tagBtn" type="button">All tags ▾</button>
+          <div class="pills" id="pills"></div>
+          <button class="iconbtn" id="surpriseBtn" type="button" aria-label="Surprise me" title="Surprise me">🎲</button>
+        </div>
       </div>
+      <p class="count" id="countLine" hidden></p>
       <div id="vols"><p class="empty">Loading stories…</p></div>
       <p class="src">Texts from Bengali Wikisource (public domain), split into short posts.</p>
     </div>
+    <nav class="az" id="az" hidden aria-label="Jump to letter"></nav>
   </section>
 
   <!-- READER -->
   <section id="readView" hidden>
     <header class="top">
-      <button class="iconbtn" id="backBtn" type="button" aria-label="Back to library">‹ গল্প</button>
+      <button class="iconbtn" id="backBtn" type="button" aria-label="Back">‹ Back</button>
       <div class="head-main">
         <h1 id="rTitle"></h1>
         <div class="bar"><i id="bar"></i></div>
@@ -263,7 +323,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
 
 <div class="back" id="back" hidden>
   <div class="card" role="dialog" aria-labelledby="backHead">
-    <h2 id="backHead">আবার স্বাগত</h2>
+    <h2 id="backHead">Welcome back</h2>
     <p>Where would you like to start?</p>
     <button class="choice primary" id="goLast" type="button" hidden><b id="goLastB"></b><span id="goLastS"></span></button>
     <button class="choice ear" id="goEar" type="button" hidden><b id="goEarB"></b><span id="goEarS"></span></button>
@@ -303,6 +363,19 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
   </div>
 </section>
 
+<section class="sheet" id="tagSheet" hidden aria-label="Filter by tags">
+  <div class="inner">
+    <div class="rowx" style="justify-content:space-between;align-items:flex-start">
+      <div><h2>Filter by tags</h2><p class="note" id="tagScope" style="margin:2px 0 0"></p></div>
+      <button class="iconbtn" data-close type="button">Close</button>
+    </div>
+    <p class="note" style="margin:0">Pick as many as you like. Within a group, any tag matches. Across groups, a story needs one from each.</p>
+    <div id="tagGroups"></div>
+  </div>
+  <div class="sfoot"><button class="btn ghost" id="tagClear" type="button">Clear all</button><button class="btn" id="tagShow" type="button">Show</button></div>
+</section>
+<div class="azb" id="azBubble" hidden></div>
+
 <section class="sheet set" id="setSheet" hidden aria-label="Settings">
   <div class="inner">
     <div class="rowx" style="justify-content:space-between">
@@ -319,7 +392,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
       <select id="rate"><option value="0.8">Slow</option><option value="1">Normal</option><option value="1.2">Fast</option></select>
     </label>
     <label for="lang">Explain in
-      <select id="lang"><option value="English">English</option><option value="Bengali">বাংলা</option></select>
+      <select id="lang"><option value="English">English</option><option value="Bengali">Bengali</option></select>
     </label>
     <label for="size">Text size
       <select id="size"><option value="17px">Small</option><option value="19px">Medium</option><option value="22px">Large</option></select>
@@ -332,8 +405,6 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
 
 <script>
 const $ = q => document.querySelector(q);
-const bn = n => String(n).replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
-const VOL = t => (t || "").replace(/^গল্পগুচ্ছ\s*\(|\)$/g, "") || "অন্যান্য";
 
 // ---------- storage (this browser only) ----------
 const store = { get(k,d){ try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } },
@@ -391,7 +462,7 @@ function matches(s, q){
 }
 
 // ---------- library ----------
-let CATALOG = [];
+let CATALOG = [], TAGS = {};
 async function loadCatalog(){
   try {
     const r = await fetch("stories/catalog.json"); if (!r.ok) throw new Error(r.status);
@@ -407,52 +478,106 @@ async function loadCatalog(){
   for (const s of CATALOG){ const t = TAGS[s.id]; s.g = t ? t.g : []; s.mood = t ? t.m : ""; s.blurb = t ? t.b : ""; }
   return true;
 }
-let TAGS = {};
 const MIN = s => Math.max(1, Math.round(s.posts * 8 / 60));            // rough reading minutes (~8 s a post)
-const GENRE = {romance:"প্রেমের গল্প", comedy:"হাসির গল্প", satire:"ব্যঙ্গ", historical:"ঐতিহাসিক", ghost:"ভূতের গল্প",
-  mystery:"রহস্য", fable:"নীতিকথা", fairytale:"রূপকথা", children:"ছোটদের", social:"সামাজিক", family:"পারিবারিক",
-  adventure:"অ্যাডভেঞ্চার", nature:"প্রকৃতি", mythology:"পুরাণ", memoir:"স্মৃতিকথা", science:"বিজ্ঞান", animal:"জীবজন্তু"};
-const MOOD = {light:"হালকা মেজাজ", funny:"মজার", moving:"মন-ছোঁয়া", sad:"করুণ", eerie:"গা-ছমছমে", thoughtful:"ভাবনার", tense:"টানটান"};
-const LISTS = [
-  {key:"short", name:"৫ মিনিটের গল্প", test: s => MIN(s) <= 5},
-  {key:"sitting", name:"এক বসায়", test: s => MIN(s) > 5 && MIN(s) <= 20},
-  {key:"long", name:"লম্বা গল্প", test: s => MIN(s) > 20},
-  ...Object.entries(GENRE).map(([k, n]) => ({key:"g-" + k, name:n, test: s => s.g.includes(k)})),
-  ...Object.entries(MOOD).map(([k, n]) => ({key:"m-" + k, name:n, test: s => s.mood === k})),
+
+// ---------- tags: three groups. Any tag within a group, every group you use. ----------
+const LEN = {short:"5-min", sitting:"One sitting", long:"Long read"};
+const GENRE = {romance:"Romance", family:"Family", social:"Social", comedy:"Comedy", satire:"Satire", ghost:"Ghost", mystery:"Mystery",
+  adventure:"Adventure", historical:"Historical", mythology:"Mythology", fairytale:"Fairy tale", fable:"Fable", children:"Children",
+  animal:"Animals", nature:"Nature", science:"Science", memoir:"Memoir"};
+const MOOD = {light:"Light", funny:"Funny", moving:"Moving", sad:"Sad", thoughtful:"Thoughtful", tense:"Tense", eerie:"Eerie"};
+const lenOf = s => MIN(s) <= 5 ? "short" : MIN(s) <= 20 ? "sitting" : "long";
+const GROUPS = [
+  {key:"len", name:"Length", tags:LEN, has:(s,k) => lenOf(s) === k},
+  {key:"g", name:"Genre", tags:GENRE, has:(s,k) => s.g.includes(k)},
+  {key:"m", name:"Mood", tags:MOOD, has:(s,k) => s.mood === k},
 ];
+const tagLabel = t => { const [g, k] = t.split(":"); return GROUPS.find(G => G.key === g).tags[k]; };
+let SEL = new Set();       // picked tags, e.g. "g:romance", "m:funny", "len:short"
+function fits(s, sel = SEL, skip = ""){
+  for (const G of GROUPS){
+    if (G.key === skip) continue;
+    let used = false, hit = false;
+    for (const t of sel){ const [g, k] = t.split(":"); if (g !== G.key) continue; used = true; if (G.has(s, k)){ hit = true; break; } }
+    if (used && !hit) return false;
+  }
+  return true;
+}
+
+// ---------- helpers ----------
 const isDone = s => store.get(kDone(s.id), "") === "1";
-// ---------- library: authors, one author's stories, or search results ----------
-let AUTHORS = [];          // [{name, stories:[...]}] most stories first
+const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+const sortKey = t => (t || "").replace(/^[^ঀ-৿A-Za-z]+/, "");
+const byTitle = (a, b) => sortKey(a.title).localeCompare(sortKey(b.title), "bn");
+function letterOf(t){ const c = sortKey(t)[0] || ""; return /[অ-হড়-য়]/.test(c) ? c : "#"; }
+const collName = (c, author) => !c ? "" :
+  c.replace(/,\s*[০-৯]{4}\s*\)/, ")").replace(/\s*\([০-৯]{4}\)/, "").replace(" (" + author + ")", "").trim();
+
+let AUTHORS = [], STORIES_AZ = [];
 function buildAuthors(){
   const m = new Map();
   for (const s of CATALOG){ if (!m.has(s.author)) m.set(s.author, []); m.get(s.author).push(s); }
-  AUTHORS = [...m].map(([name, stories]) => ({name, stories})).sort((a,b) => b.stories.length - a.stories.length || a.name.localeCompare(b.name, "bn"));
+  AUTHORS = [...m].map(([name, stories]) => {
+    const gc = {}; for (const s of stories) for (const g of s.g) gc[g] = (gc[g] || 0) + 1;
+    const top = Object.entries(gc).filter(x => x[1] >= 2 && GENRE[x[0]]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => GENRE[x[0]]);
+    return {name, stories: stories.sort(byTitle), top};
+  }).sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name), "bn"));
+  STORIES_AZ = [...CATALOG].sort(byTitle);
 }
-const collName = (c, author) => !c ? "অন্যান্য গল্প" :
-  c.replace(/,\s*[০-৯]{4}\s*\)/, ")").replace(/\s*\([০-৯]{4}\)/, "").replace(" (" + author + ")", "").trim();
+function nextStory(){
+  const A = STORY && AUTHORS.find(a => a.name === STORY.author); if (!A) return null;
+  const i = A.stories.findIndex(s => s.id === STORY.id);
+  return i >= 0 ? A.stories[i + 1] || null : null;
+}
 
+// ---------- rows ----------
 function storyRow(s, showAuthor){
-  const b = document.createElement("button"); b.type = "button"; b.className = "row";
-  const t = document.createElement("span"); t.className = "t"; t.textContent = s.title;
-  const m = document.createElement("span"); m.className = "m";
-  const last = num(kLast(s.id)), done = store.get(kDone(s.id), "") === "1";
-  m.textContent = done ? "পড়া হয়েছে" : last > 1 ? bn(Math.round(last / s.posts * 100)) + "%" : "~" + bn(MIN(s)) + " মিনিট";
-  if (done) m.classList.add("done");
-  b.append(t, m);
-  if (showAuthor){ const a = document.createElement("span"); a.className = "by"; a.textContent = s.author + (s.collection ? " · " + collName(s.collection, s.author) : ""); b.append(a); }
-  if (s.blurb && showAuthor !== "noblurb"){ const bl = document.createElement("span"); bl.className = "bl"; bl.textContent = s.blurb; b.append(bl); }
-  if (last > 1 && !done){ const mini = document.createElement("span"); mini.className = "mini"; const i = document.createElement("i"); i.style.width = (last / s.posts * 100) + "%"; mini.append(i); b.append(mini); }
+  const b = el("button", "row"); b.type = "button";
+  const last = num(kLast(s.id)), done = isDone(s);
+  b.append(el("span", "t", s.title),
+    el("span", "m" + (done ? " done" : ""), done ? "Read ✓" : last > 1 ? Math.round(last / s.posts * 100) + "%" : MIN(s) + " min"));
+  const book = collName(s.collection, s.author);
+  const by = showAuthor ? s.author + (book ? " · " + book : "") : book;
+  if (by) b.append(el("span", "by", by));
+  if (s.blurb) b.append(el("span", "bl", s.blurb));
+  const tg = el("span", "tags");
+  for (const k of s.g) if (GENRE[k]) tg.append(el("span", "tag" + (SEL.has("g:" + k) ? " on" : ""), GENRE[k]));
+  if (MOOD[s.mood]) tg.append(el("span", "tag mood" + (SEL.has("m:" + s.mood) ? " on" : ""), MOOD[s.mood]));
+  if (tg.childNodes.length) b.append(tg);
+  if (last > 1 && !done){ const mini = el("span", "mini"), i = el("i"); i.style.width = (last / s.posts * 100) + "%"; mini.append(i); b.append(mini); }
   b.onclick = () => openStory(s.id);
   return b;
 }
-function section(title, rows){
-  const sec = document.createElement("div"); sec.className = "vol";
-  const h = document.createElement("h2"); h.textContent = title;
-  const box = document.createElement("div"); box.className = "list"; rows.forEach(r => box.append(r));
-  sec.append(h, box); return sec;
+function authorRow(A, i, n){
+  const b = el("button", "row arow"); b.type = "button";
+  const total = A.stories.length, read = A.stories.filter(isDone).length;
+  b.append(el("span", "av", sortKey(A.name)[0] || "?"), el("span", "t", A.name),
+    el("span", "m", SEL.size ? n + " of " + total : plural(total, "story", "stories")));
+  const sub = [...A.top, read ? read + " read" : ""].filter(Boolean).join(" · ");
+  if (sub) b.append(el("span", "by", sub));
+  b.onclick = () => { location.hash = "author-" + i; };
+  return b;
 }
-let AUTHOR = null;         // index into AUTHORS when an author page is open
-let LIST = null;           // key of an open list (5-minute stories, a genre, a mood…)
+// Rows grouped under letter headers. Returns the letters used, for the side index.
+function lettered(items, nameOf, make){
+  const vols = $("#vols"), letters = []; let box = null, cur = null;
+  for (const it of items){
+    const L = letterOf(nameOf(it));
+    if (L !== cur){
+      cur = L; const sec = el("div", "vol"), h = el("h2", "letter", L); box = el("div", "list");
+      if (!letters.includes(L)){ letters.push(L); h.id = "L-" + L; }
+      sec.append(h, box); vols.append(sec);
+    }
+    box.append(make(it));
+  }
+  return letters;
+}
+function emptyNote(msg){
+  const p = el("div", "empty"); p.append(el("span", "", msg + " "));
+  if (SEL.size){ const c = el("button", "btn ghost", "Clear tags"); c.type = "button"; c.onclick = () => { SEL.clear(); renderLibrary(); }; p.append(c); }
+  return p;
+}
 
 // Story of the day: same pick all day, changes at midnight; skips stories you've finished.
 function todayKey(){ const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); }
@@ -466,72 +591,151 @@ function storyOfDay(){
   if (+pDay === todayKey()){ const s = CATALOG.find(x => x.id === pId); if (s) return s; }
   const s = use[h % use.length]; store.set("bb.today", todayKey() + "|" + s.id); return s;
 }
-function chip(label, onClick, cls){
-  const c = document.createElement("button"); c.type = "button"; c.className = "chip" + (cls ? " " + cls : ""); c.textContent = label; c.onclick = onClick; return c;
+function renderToday(){
+  const box = $("#todayBox"); box.textContent = ""; const s = storyOfDay(); if (!s) return;
+  const card = el("button", "today"); card.type = "button";
+  card.append(el("span", "eyebrow", "STORY OF THE DAY"), el("span", "tt", s.title),
+    el("span", "ta", s.author + " · " + MIN(s) + " min" + (GENRE[s.g[0]] ? " · " + GENRE[s.g[0]] : "")),
+    el("span", "tb", s.blurb),
+    el("span", "go", isDone(s) ? "Read ✓ · read again" : num(kLast(s.id)) > 1 ? "Continue →" : "Start reading →"));
+  card.onclick = () => openStory(s.id); box.append(card);
 }
-function renderHomeExtras(vols){
-  const s = storyOfDay();
-  if (s){
-    const card = document.createElement("button"); card.type = "button"; card.className = "today";
-    const e = document.createElement("span"); e.className = "eyebrow"; e.textContent = "আজকের গল্প";
-    const t = document.createElement("span"); t.className = "tt"; t.textContent = s.title;
-    const a = document.createElement("span"); a.className = "ta"; a.textContent = s.author + " · ~" + bn(MIN(s)) + " মিনিট" + (s.g[0] ? " · " + GENRE[s.g[0]] : "");
-    const b = document.createElement("span"); b.className = "tb"; b.textContent = s.blurb;
-    const go = document.createElement("span"); go.className = "go"; go.textContent = isDone(s) ? "পড়া হয়েছে ✓ · আবার পড়ুন" : num(kLast(s.id)) > 1 ? "পড়া চালিয়ে যান →" : "পড়তে শুরু করুন →";
-    card.append(e, t, a, b, go); card.onclick = () => openStory(s.id);
-    vols.append(card);
-  }
-  const box = document.createElement("div"); box.className = "vol";
-  const h = document.createElement("h2"); h.textContent = "তালিকা";
-  const row = document.createElement("div"); row.className = "chips";
-  row.append(chip("🎲 যেকোনো একটা", surprise, "accent"));
-  for (const L of LISTS){
-    const n = CATALOG.filter(L.test).length; if (n < 4) continue;
-    row.append(chip(L.name + " · " + bn(n), () => { location.hash = "list-" + L.key; }));
-  }
-  box.append(h, row); vols.append(box);
-}
-function surprise(){
-  const pool = CATALOG.filter(s => !isDone(s) && num(kLast(s.id)) <= 1 && MIN(s) <= 20);
-  const s = (pool.length ? pool : CATALOG)[Math.floor(Math.random() * (pool.length || CATALOG.length))];
-  openStory(s.id);
-}
-function renderLibrary(){
+function scope(){
   const q = $("#search").value.trim();
-  const vols = $("#vols"); vols.textContent = "";
-  const L = LIST && LISTS.find(x => x.key === LIST);
-  $("#authorHead").hidden = !((AUTHOR !== null || L) && !q);
-  if (L && !q){
-    const list = CATALOG.filter(L.test).sort((a,b) => isDone(a) - isDone(b) || MIN(a) - MIN(b));
-    $("#authorName").textContent = L.name; $("#authorCount").textContent = bn(list.length) + "টি গল্প" + (L.key === "short" || L.key === "sitting" ? " · সময় আনুমানিক" : "");
-    vols.append(section(bn(list.filter(isDone).length) + "টি পড়া হয়েছে", list.map(s => storyRow(s, true))));
-    renderShelf("list"); return;
-  }
-  if (q){
-    const hits = CATALOG.filter(s => matches(s, q)).sort((a,b) => a._score - b._score);
-    if (!hits.length){ const p = document.createElement("p"); p.className = "empty"; p.textContent = "No story or author matches “" + q + "”."; vols.append(p); }
-    else vols.append(section(bn(hits.length) + "টি গল্প মিলেছে", hits.slice(0, 200).map(s => storyRow(s, true))));
-  } else if (AUTHOR !== null){
-    const A = AUTHORS[AUTHOR];
-    $("#authorName").textContent = A.name; $("#authorCount").textContent = bn(A.stories.length) + "টি গল্প";
-    const groups = new Map();
-    for (const s of A.stories){ const c = collName(s.collection, s.author); if (!groups.has(c)) groups.set(c, []); groups.get(c).push(s); }
-    for (const [c, list] of groups) vols.append(section(c + " · " + bn(list.length), list.map(s => storyRow(s, false))));
-  } else {
-    const rows = AUTHORS.map((A, i) => {
-      const b = document.createElement("button"); b.type = "button"; b.className = "row author";
-      const t = document.createElement("span"); t.className = "t"; t.textContent = A.name;
-      const m = document.createElement("span"); m.className = "m";
-      const read = A.stories.filter(s => store.get(kDone(s.id), "") === "1").length;
-      m.textContent = bn(A.stories.length) + "টি গল্প" + (read ? " · " + bn(read) + " পড়া" : "");
-      b.append(t, m); b.onclick = () => { location.hash = "author-" + i; };
-      return b;
-    });
-    renderHomeExtras(vols);
-    vols.append(section("লেখক · " + bn(AUTHORS.length) + " জন · " + bn(CATALOG.length) + "টি গল্প", rows));
-  }
-  renderShelf(q || (AUTHOR !== null ? "author" : ""));
+  if (AUTHOR !== null) return AUTHORS[AUTHOR].stories;
+  return q ? CATALOG.filter(s => matches(s, q)) : CATALOG;
 }
+$("#surpriseBtn").onclick = () => {
+  const all = scope().filter(s => fits(s));
+  const pool = all.filter(s => !isDone(s) && num(kLast(s.id)) <= 1 && MIN(s) <= 20);
+  const use = pool.length ? pool : all;
+  if (!use.length){ toast("No stories match these tags."); return; }
+  openStory(use[Math.floor(Math.random() * use.length)].id);
+};
+
+// ---------- library screen: Authors tab, Stories tab, one author, or search ----------
+let AUTHOR = null;         // index into AUTHORS when an author page is open
+let TAB = store.get("bb.tab", "authors") === "stories" ? "stories" : "authors";
+function renderLibrary(){
+  const q = $("#search").value.trim(), A = AUTHOR !== null ? AUTHORS[AUTHOR] : null;
+  $("#brandBox").hidden = !!A; $("#authorBack").hidden = !A; $("#authorBox").hidden = !A;
+  $("#homeTop").hidden = !!A || !!q; $("#search").hidden = !!A; $("#tabs").hidden = !!A || !!q;
+  for (const t of document.querySelectorAll("#tabs [data-tab]")) t.setAttribute("aria-selected", t.dataset.tab === TAB ? "true" : "false");
+  renderFilters();
+  const vols = $("#vols"); vols.textContent = "";
+  let letters = [], shown = 0, count = "";
+  if (q){
+    const hits = CATALOG.filter(s => matches(s, q) && fits(s)).sort((a, b) => a._score - b._score);
+    if (!hits.length) vols.append(emptyNote("No story or author matches “" + q + "”" + (SEL.size ? " with these tags." : ".")));
+    else {
+      count = plural(hits.length, "story", "stories") + " found" + (SEL.size ? " with these tags" : "");
+      const box = el("div", "list"); hits.slice(0, 200).forEach(s => box.append(storyRow(s, true))); vols.append(box);
+    }
+  } else if (A){
+    const list = A.stories.filter(s => fits(s)); shown = list.length;
+    $("#authorName").textContent = A.name;
+    $("#authorCount").textContent = (SEL.size ? list.length + " of " : "") + plural(A.stories.length, "story", "stories") + (SEL.size ? " match" : "");
+    document.title = A.name + " · bongBoi";
+    if (!list.length) vols.append(emptyNote("No stories by " + A.name + " with these tags."));
+    letters = lettered(list, s => s.title, s => storyRow(s, false));
+  } else if (TAB === "authors"){
+    const rows = [];
+    AUTHORS.forEach((A, i) => { const n = SEL.size ? A.stories.filter(s => fits(s)).length : A.stories.length; if (n) rows.push({A, i, n}); });
+    shown = rows.length;
+    count = plural(rows.length, "author", "authors") + " · " + plural(rows.reduce((t, x) => t + x.n, 0), "story", "stories") + (SEL.size ? " match" : "");
+    if (!rows.length) vols.append(emptyNote("No stories match these tags."));
+    letters = lettered(rows, x => x.A.name, x => authorRow(x.A, x.i, x.n));
+  } else {
+    const list = STORIES_AZ.filter(s => fits(s)); shown = list.length;
+    count = plural(list.length, "story", "stories") + (SEL.size ? " match" : ", A–Z");
+    if (!list.length) vols.append(emptyNote("No stories match these tags."));
+    letters = lettered(list, s => s.title, s => storyRow(s, true));
+  }
+  $("#countLine").textContent = count; $("#countLine").hidden = !count;
+  buildAZ(shown > 20 ? letters : []);
+  if (!A && !q){ renderShelf(""); renderToday(); }
+  measure(); azShow();
+}
+function renderFilters(){
+  const n = SEL.size, b = $("#tagBtn");
+  b.textContent = (n ? "Tags · " + n : "All tags") + " ▾"; b.classList.toggle("on", !!n);
+  const p = $("#pills"); p.textContent = "";
+  for (const t of SEL){
+    const x = el("button", "pill" + (t.startsWith("m:") ? " mood" : ""), tagLabel(t) + "  ×"); x.type = "button";
+    x.setAttribute("aria-label", "Remove " + tagLabel(t));
+    x.onclick = () => { SEL.delete(t); renderLibrary(); };
+    p.append(x);
+  }
+  if (!n){ const h = el("button", "hint", "Filter by genre, mood or length"); h.type = "button"; h.onclick = openTags; p.append(h); }
+}
+function measure(){
+  if ($("#libView").hidden) return;
+  const r = document.documentElement.style;
+  r.setProperty("--hh", $("#libHead").offsetHeight + "px");
+  r.setProperty("--ch", $("#controls").offsetHeight + "px");
+}
+addEventListener("resize", measure);
+// The A–Z strip appears once the list has reached the top of the screen.
+function azShow(){ if ($("#libView").hidden || $("#az").hidden) return;
+  $("#az").classList.toggle("off", $("#ctlAnchor").getBoundingClientRect().top > $("#libHead").offsetHeight + 1); }
+addEventListener("scroll", azShow, {passive:true});
+// After a tab switch or a new filter, bring the list's top into view if you'd scrolled past it.
+function keepControlsTop(){
+  const y = $("#ctlAnchor").getBoundingClientRect().top + scrollY - $("#libHead").offsetHeight;
+  if (scrollY > y) scrollTo(0, y);
+}
+for (const t of document.querySelectorAll("#tabs [data-tab]")) t.onclick = () => {
+  TAB = t.dataset.tab; store.set("bb.tab", TAB); renderLibrary(); keepControlsTop();
+};
+
+// ---------- tag picker ----------
+let DRAFT = new Set();
+function openTags(){ DRAFT = new Set(SEL); renderTagSheet(); openSheet("#tagSheet"); }
+function renderTagSheet(){
+  const list = scope(), box = $("#tagGroups"); box.textContent = "";
+  $("#tagScope").textContent = AUTHOR !== null ? "Stories by " + AUTHORS[AUTHOR].name : $("#search").value.trim() ? "Stories in your search" : "All stories";
+  for (const G of GROUPS){
+    const chips = el("div", "tchips");
+    for (const [k, name] of Object.entries(G.tags)){
+      const t = G.key + ":" + k, on = DRAFT.has(t);
+      if (!on && !list.some(s => G.has(s, k))) continue;             // tag never used here
+      const n = list.filter(s => G.has(s, k) && fits(s, DRAFT, G.key)).length;
+      const c = el("button", "tchip" + (G.key === "m" ? " mood" : ""), name); c.type = "button";
+      c.append(el("small", "", String(n)));
+      c.setAttribute("aria-pressed", on ? "true" : "false"); c.disabled = !on && !n;
+      c.onclick = () => { if (on) DRAFT.delete(t); else DRAFT.add(t); renderTagSheet(); };
+      chips.append(c);
+    }
+    if (!chips.childNodes.length) continue;
+    const sec = el("div", "tg"); sec.append(el("h3", "", G.name), chips); box.append(sec);
+  }
+  const total = list.filter(s => fits(s, DRAFT)).length;
+  $("#tagShow").textContent = total ? "Show " + plural(total, "story", "stories") : "No stories match";
+  $("#tagShow").disabled = !total; $("#tagClear").disabled = !DRAFT.size;
+}
+$("#tagBtn").onclick = openTags;
+$("#tagClear").onclick = () => { DRAFT.clear(); renderTagSheet(); };
+$("#tagShow").onclick = () => { SEL = new Set(DRAFT); closeSheets(); renderLibrary(); keepControlsTop(); };
+
+// ---------- A–Z side index: tap or slide a finger along it ----------
+function buildAZ(letters){
+  const az = $("#az"); az.textContent = ""; az.hidden = letters.length < 3;
+  az.style.setProperty("--n", letters.length);
+  for (const L of letters){ const s = el("span", "", L); s.dataset.l = L; az.append(s); }
+}
+let azOn = false, azLast = "";
+function azJump(e){
+  const r = $("#az").getBoundingClientRect();
+  const t = document.elementFromPoint(r.left + r.width / 2, e.clientY)?.closest?.("[data-l]");
+  if (!t || t.dataset.l === azLast) return; azLast = t.dataset.l;
+  document.getElementById("L-" + azLast)?.scrollIntoView({block: "start"});
+  const bb = $("#azBubble"); bb.textContent = azLast; bb.hidden = false;
+  clearTimeout(azJump.t); azJump.t = setTimeout(() => { bb.hidden = true; }, 700);
+}
+$("#az").addEventListener("pointerdown", e => { azOn = true; azLast = ""; $("#az").setPointerCapture?.(e.pointerId); azJump(e); e.preventDefault(); });
+$("#az").addEventListener("pointermove", e => { if (azOn) azJump(e); });
+$("#az").addEventListener("pointerup", () => { azOn = false; });
+$("#az").addEventListener("pointercancel", () => { azOn = false; });
 
 // ---------- continue-reading shelf ----------
 function getShelf(){
@@ -547,15 +751,13 @@ function renderShelf(q){
   $("#shelfBox").hidden = !!q || !ids.length;
   for (const id of ids){
     const s = CATALOG.find(x => x.id === id), last = num(kLast(id));
-    const card = document.createElement("div"); card.className = "scard";
-    const open = document.createElement("button"); open.type = "button"; open.className = "open";
-    const t = document.createElement("span"); t.className = "t"; t.textContent = s.title;
-    const au = document.createElement("span"); au.className = "snip"; au.textContent = s.author;
-    const sn = document.createElement("span"); sn.className = "snip";
-    sn.textContent = last > 1 ? bn(last) + " / " + bn(s.posts) + " · " + bn(Math.round(last / s.posts * 100)) + "%" : "শুরু হয়নি";
-    const bar = document.createElement("span"); bar.className = "bar"; const i = document.createElement("i"); i.style.width = (last / s.posts * 100) + "%"; bar.append(i);
-    open.append(t, au, sn, bar); open.onclick = () => openStory(id);
-    const x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "×";
+    const card = el("div", "scard");
+    const open = el("button", "open"); open.type = "button";
+    const bar = el("span", "bar"), i = el("i"); i.style.width = (last / s.posts * 100) + "%"; bar.append(i);
+    open.append(el("span", "t", s.title), el("span", "snip", s.author),
+      el("span", "snip", last > 1 ? last + " / " + s.posts + " · " + Math.round(last / s.posts * 100) + "%" : "Not started"), bar);
+    open.onclick = () => openStory(id);
+    const x = el("button", "x", "×"); x.type = "button";
     x.setAttribute("aria-label", "Remove " + s.title + " from Continue reading");
     x.onclick = () => {
       const before = getShelf();
@@ -566,7 +768,7 @@ function renderShelf(q){
   }
 }
 $("#search").addEventListener("input", renderLibrary);
-$("#allAuthors").onclick = () => { location.hash = ""; };
+$("#authorBack").onclick = () => { location.hash = ""; };
 
 // ---------- reader ----------
 let STORY = null, ITEMS = [], READ = [], TOTAL = 0, rendered = 0, earmark = 0, focusN = 0, started = false;
@@ -597,22 +799,26 @@ function showLibrary(){
   closeSheets(); $("#back").hidden = true;
   STORY = null; $("#readView").hidden = true; $("#libView").hidden = false; document.title = "bongBoi";
   $("#pager").hidden = true; document.body.classList.remove("pagemode");
-  renderLibrary(); scrollTo(0,0);
+  renderLibrary(); scrollTo(0, RESTORE ? SCROLL[location.hash.slice(1)] || 0 : 0); RESTORE = false; azShow();
 }
 $("#backBtn").onclick = () => {
   const i = STORY ? AUTHORS.findIndex(A => A.name === STORY.author) : -1;
   location.hash = i >= 0 && CAME_FROM_AUTHOR ? "author-" + i : "";
 };
-let CAME_FROM_AUTHOR = false;
-addEventListener("hashchange", e => { CAME_FROM_AUTHOR = /#author-\d+$/.test(e.oldURL || ""); }, {capture:true});
+// Remember where you were on each list, and whether a story was opened from an author page.
+let CAME_FROM_AUTHOR = false, RESTORE = false; const SCROLL = {};
+addEventListener("hashchange", e => {
+  const old = (e.oldURL || "").split("#")[1] || "", now = location.hash.slice(1);
+  if (!/^ws-/.test(old)) SCROLL[old] = scrollY;
+  if (/^ws-/.test(now) && !/^ws-/.test(old)) CAME_FROM_AUTHOR = /^author-\d+$/.test(old);
+  RESTORE = /^ws-/.test(old) || now === "";
+}, {capture:true});
 addEventListener("hashchange", route);
 function route(){
   const id = location.hash.slice(1);
   if (id && CATALOG.some(s => s.id === id)) return openStory(id);
   const a = /^author-(\d+)$/.exec(id);
   AUTHOR = a && AUTHORS[+a[1]] ? +a[1] : null;
-  const l = /^list-([a-z-]+)$/.exec(id);
-  LIST = l && LISTS.some(x => x.key === l[1]) ? l[1] : null;
   showLibrary();
 }
 
@@ -622,7 +828,7 @@ function makePost(p){
   d.dataset.n = p.n; d.id = "p" + p.n;
   const t = document.createElement("p"); t.className = "txt"; t.textContent = p.t;
   const m = document.createElement("div"); m.className = "meta";
-  const n = document.createElement("span"); n.className = "n"; n.textContent = bn(p.n) + " / " + bn(TOTAL);
+  const n = document.createElement("span"); n.className = "n"; n.textContent = String(p.n) + " / " + String(TOTAL);
   const ear = document.createElement("button"); ear.type = "button"; ear.className = "ear";
   ear.textContent = p.n === earmark ? "Earmarked" : "Earmark"; ear.setAttribute("aria-pressed", p.n === earmark ? "true" : "false");
   ear.addEventListener("click", e => { e.stopPropagation(); toggleEar(p.n); });
@@ -650,8 +856,8 @@ new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) renderMore(
 
 function showEnd(){
   $("#endCard").hidden = false;
-  $("#endDated").textContent = (STORY.dated ? STORY.dated + " · " : "") + "গল্প শেষ";
-  const i = CATALOG.findIndex(s => s.id === STORY.id), nx = CATALOG[i + 1] && CATALOG[i + 1].author === STORY.author ? CATALOG[i + 1] : null;
+  $("#endDated").textContent = (STORY.dated ? STORY.dated + " · " : "") + "The end";
+  const nx = nextStory();
   $("#nextBtn").hidden = !nx;
   if (nx){ $("#nextTitle").textContent = nx.title; $("#nextBtn").onclick = () => openStory(nx.id); }
 }
@@ -674,7 +880,7 @@ function updateFocus(){
   if (n !== focusN){
     feed.querySelector(".post.focus")?.classList.remove("focus");
     best.classList.add("focus"); focusN = n;
-    $("#prog").textContent = bn(n) + "/" + bn(TOTAL);
+    $("#prog").textContent = String(n) + "/" + String(TOTAL);
     $("#bar").style.width = (n / TOTAL * 100) + "%";
     if (started){
       store.set(kLast(STORY.id), String(n));
@@ -704,10 +910,10 @@ function buildPages(){
     pcols.append(p);
   }
   const end = document.createElement("div"); end.className = "pend";
-  const d = document.createElement("span"); d.className = "dated"; d.textContent = (STORY.dated ? STORY.dated + " · " : "") + "গল্প শেষ";
+  const d = document.createElement("span"); d.className = "dated"; d.textContent = (STORY.dated ? STORY.dated + " · " : "") + "The end";
   end.append(d);
-  const i = CATALOG.findIndex(s => s.id === STORY.id), nx = CATALOG[i + 1] && CATALOG[i + 1].author === STORY.author ? CATALOG[i + 1] : null;
-  if (nx){ const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = "পরের গল্প: " + nx.title; b.onclick = () => openStory(nx.id); end.append(b); }
+  const nx = nextStory();
+  if (nx){ const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = "Next story: " + nx.title; b.onclick = () => openStory(nx.id); end.append(b); }
   pcols.append(end);
   PG.built = true;
 }
@@ -732,9 +938,9 @@ function firstPostOnPage(p){
 function goPage(p){
   PG.page = Math.max(0, Math.min(PG.pages - 1, p));
   pcols.style.transform = "translateX(" + (-PG.page * (PG.w + PG.gap)) + "px)";
-  $("#pNum").textContent = "পৃষ্ঠা " + bn(PG.page + 1) + " / " + bn(PG.pages);
+  $("#pNum").textContent = "Page " + String(PG.page + 1) + " / " + String(PG.pages);
   $("#pSlider").value = PG.page + 1;
-  $("#prog").textContent = bn(PG.page + 1) + "/" + bn(PG.pages);
+  $("#prog").textContent = String(PG.page + 1) + "/" + String(PG.pages);
   $("#bar").style.width = ((PG.page + 1) / PG.pages * 100) + "%";
   const first = firstPostOnPage(PG.page);
   const onPage = earmark && pageOfPost(earmark) === PG.page;
@@ -796,7 +1002,7 @@ function toggleEar(n){
   }
   pcols.querySelectorAll(".pp.marked").forEach(x => x.classList.remove("marked"));
   if (earmark) pcols.querySelector('.pp[data-n="' + earmark + '"]')?.classList.add("marked");
-  toast(earmark ? "Earmarked post " + bn(earmark) : "Earmark removed");
+  toast(earmark ? "Earmarked post " + String(earmark) : "Earmark removed");
 }
 let tt = 0;
 function toast(msg, actionLabel, action){
@@ -819,8 +1025,8 @@ function welcome(){
   const hasLast = last > 1 && last <= TOTAL, hasEar = earmark > 0 && earmark <= TOTAL;
   if (!hasLast && !hasEar){ start(1); return; }
   $("#goLast").hidden = !hasLast; $("#goEar").hidden = !(hasEar && earmark !== last);
-  if (hasLast){ $("#goLastB").textContent = "Continue from where you stopped · post " + bn(last); $("#goLastS").textContent = snippet(last); $("#goLast").onclick = () => start(last); }
-  if (hasEar){ $("#goEarB").textContent = "Go to your earmark · post " + bn(earmark); $("#goEarS").textContent = snippet(earmark); $("#goEar").onclick = () => start(earmark); }
+  if (hasLast){ $("#goLastB").textContent = "Continue from where you stopped · post " + String(last); $("#goLastS").textContent = snippet(last); $("#goLast").onclick = () => start(last); }
+  if (hasEar){ $("#goEarB").textContent = "Go to your earmark · post " + String(earmark); $("#goEarS").textContent = snippet(earmark); $("#goEar").onclick = () => start(earmark); }
   $("#goStartS").textContent = snippet(1);
   $("#goStart").onclick = () => start(1);
   $("#back").hidden = false;
@@ -863,7 +1069,7 @@ addEventListener("hashchange", speakStop);
 
 // ---------- sheets ----------
 function openSheet(id){ $("#scrim").hidden = false; $(id).hidden = false; }
-function closeSheets(){ ctl?.abort(); $("#scrim").hidden = true; $("#askSheet").hidden = true; $("#setSheet").hidden = true; }
+function closeSheets(){ ctl?.abort(); $("#scrim").hidden = true; $("#askSheet").hidden = true; $("#setSheet").hidden = true; $("#tagSheet").hidden = true; }
 $("#scrim").onclick = closeSheets;
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
 document.querySelectorAll("[data-open-settings]").forEach(b => b.onclick = () => openSheet("#setSheet"));
@@ -875,7 +1081,7 @@ const aiReady = (window.claude?.use ? window.claude.use("sample") : Promise.reso
 
 function openAsk(p){
   current = p; selWord = "";
-  $("#askHead").textContent = "Post " + bn(p.n);
+  $("#askHead").textContent = "Post " + String(p.n);
   $("#askQuote").textContent = p.t;
   const words = $("#askWords"); words.textContent = "";
   const seen = new Set();

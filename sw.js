@@ -2,7 +2,7 @@
 // The page and story list are fetched fresh when online (so updates show up),
 // and fall back to the saved copy when offline. Stories, icons and fonts are
 // saved the first time they load and served from the phone after that.
-const CACHE = "bongboi-v3";
+const CACHE = "bongboi-v4";
 const CORE = ["./", "index.html", "stories/catalog.json", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {

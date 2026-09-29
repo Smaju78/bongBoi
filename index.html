@@ -86,6 +86,11 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .row .m.done{color:var(--mark);font-weight:600}
 .row .mini{grid-column:1/-1;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
 .row .mini i{display:block;height:100%;background:var(--mark)}
+.row .by{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-2px}
+.row.author .t{font-size:19px}
+.authorhead{display:flex;align-items:center;gap:12px}
+.authorhead h1{font-family:var(--story);font-weight:400;font-size:24px;margin:0;line-height:1.2}
+.authorhead p{margin:0;color:var(--muted);font-size:13px}
 .empty{color:var(--muted);font-size:14px;padding:12px}
 .src{font-size:12px;color:var(--muted)}
 
@@ -166,7 +171,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
   <!-- LIBRARY -->
   <section id="libView">
     <header class="top">
-      <div class="head-main"><p class="brand">bongBoi<small>রবীন্দ্রনাথের গল্প</small></p></div>
+      <div class="head-main"><p class="brand">bongBoi<small>বাংলা গল্প</small></p></div>
       <button class="iconbtn" data-open-settings type="button">Settings</button>
     </header>
     <div id="library">
@@ -174,7 +179,11 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
         <h2 class="shelfh">Continue reading</h2>
         <div class="shelf" id="shelf"></div>
       </div>
-      <input class="search" id="search" type="search" placeholder="Search: kabuliwala, chuti, কাবুলিওয়ালা" aria-label="Search stories">
+      <input class="search" id="search" type="search" placeholder="Search stories or authors: kabuliwala, sukumar" aria-label="Search stories or authors">
+      <div class="authorhead" id="authorHead" hidden>
+        <button class="iconbtn" id="allAuthors" type="button">‹ সব লেখক</button>
+        <div><h1 id="authorName"></h1><p id="authorCount"></p></div>
+      </div>
       <div id="vols"><p class="empty">Loading stories…</p></div>
       <p class="src">Texts from Bengali Wikisource (public domain), split into short posts.</p>
     </div>
@@ -316,11 +325,13 @@ function matches(s, q){
   if (!q) return true;
   s._score = 3;
   if (s.title.includes(q)){ s._score = s.title.startsWith(q) ? 0 : 1; return true; }
+  if (s.author.includes(q)){ s._score = 3; return true; }
   const k = skeleton(q); if (k.length < 2) return toLatin(s.title).toLowerCase().includes(q.toLowerCase());
   s._sk = s._sk || skeleton(s.title);
-  if (!s._sk.includes(k)) return false;
-  s._score = s._sk === k ? 0 : s._sk.startsWith(k) ? 1 : 2;
-  return true;
+  s._ska = s._ska || skeleton(s.author);
+  if (s._sk.includes(k)){ s._score = s._sk === k ? 0 : s._sk.startsWith(k) ? 1 : 2; return true; }
+  if (s._ska.includes(k)){ s._score = s._ska.startsWith(k) ? 0.5 : 3; return true; }
+  return false;
 }
 
 // ---------- library ----------
@@ -335,33 +346,63 @@ async function loadCatalog(){
   }
   return true;
 }
+// ---------- library: authors, one author's stories, or search results ----------
+let AUTHORS = [];          // [{name, stories:[...]}] most stories first
+function buildAuthors(){
+  const m = new Map();
+  for (const s of CATALOG){ if (!m.has(s.author)) m.set(s.author, []); m.get(s.author).push(s); }
+  AUTHORS = [...m].map(([name, stories]) => ({name, stories})).sort((a,b) => b.stories.length - a.stories.length || a.name.localeCompare(b.name, "bn"));
+}
+const collName = (c, author) => !c ? "অন্যান্য গল্প" :
+  c.replace(/,\s*[০-৯]{4}\s*\)/, ")").replace(/\s*\([০-৯]{4}\)/, "").replace(" (" + author + ")", "").trim();
+
+function storyRow(s, showAuthor){
+  const b = document.createElement("button"); b.type = "button"; b.className = "row";
+  const t = document.createElement("span"); t.className = "t"; t.textContent = s.title;
+  const m = document.createElement("span"); m.className = "m";
+  const last = num(kLast(s.id)), done = store.get(kDone(s.id), "") === "1";
+  m.textContent = done ? "পড়া হয়েছে" : last > 1 ? bn(Math.round(last / s.posts * 100)) + "%" : bn(s.posts) + " পোস্ট";
+  if (done) m.classList.add("done");
+  b.append(t, m);
+  if (showAuthor){ const a = document.createElement("span"); a.className = "by"; a.textContent = s.author + (s.collection ? " · " + collName(s.collection, s.author) : ""); b.append(a); }
+  if (last > 1 && !done){ const mini = document.createElement("span"); mini.className = "mini"; const i = document.createElement("i"); i.style.width = (last / s.posts * 100) + "%"; mini.append(i); b.append(mini); }
+  b.onclick = () => openStory(s.id);
+  return b;
+}
+function section(title, rows){
+  const sec = document.createElement("div"); sec.className = "vol";
+  const h = document.createElement("h2"); h.textContent = title;
+  const box = document.createElement("div"); box.className = "list"; rows.forEach(r => box.append(r));
+  sec.append(h, box); return sec;
+}
+let AUTHOR = null;         // index into AUTHORS when an author page is open
 function renderLibrary(){
   const q = $("#search").value.trim();
   const vols = $("#vols"); vols.textContent = "";
-  const groups = new Map();
-  const hits = CATALOG.filter(s => matches(s, q));
-  if (q){ hits.sort((a,b) => a._score - b._score); if (hits.length) groups.set("", hits); }
-  else for (const s of hits){ const v = VOL(s.collection); if (!groups.has(v)) groups.set(v, []); groups.get(v).push(s); }
-  if (!groups.size){ const p = document.createElement("p"); p.className = "empty"; p.textContent = "No story matches “" + q + "”."; vols.append(p); }
-  for (const [v, list] of groups){
-    const sec = document.createElement("div"); sec.className = "vol";
-    const h = document.createElement("h2"); h.textContent = v ? "গল্পগুচ্ছ · " + v + " · " + bn(list.length) + "টি গল্প" : bn(list.length) + "টি গল্প মিলেছে";
-    const box = document.createElement("div"); box.className = "list";
-    for (const s of list){
-      const b = document.createElement("button"); b.type = "button"; b.className = "row";
-      const t = document.createElement("span"); t.className = "t"; t.textContent = s.title;
+  $("#authorHead").hidden = !(AUTHOR !== null && !q);
+  if (q){
+    const hits = CATALOG.filter(s => matches(s, q)).sort((a,b) => a._score - b._score);
+    if (!hits.length){ const p = document.createElement("p"); p.className = "empty"; p.textContent = "No story or author matches “" + q + "”."; vols.append(p); }
+    else vols.append(section(bn(hits.length) + "টি গল্প মিলেছে", hits.slice(0, 200).map(s => storyRow(s, true))));
+  } else if (AUTHOR !== null){
+    const A = AUTHORS[AUTHOR];
+    $("#authorName").textContent = A.name; $("#authorCount").textContent = bn(A.stories.length) + "টি গল্প";
+    const groups = new Map();
+    for (const s of A.stories){ const c = collName(s.collection, s.author); if (!groups.has(c)) groups.set(c, []); groups.get(c).push(s); }
+    for (const [c, list] of groups) vols.append(section(c + " · " + bn(list.length), list.map(s => storyRow(s, false))));
+  } else {
+    const rows = AUTHORS.map((A, i) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "row author";
+      const t = document.createElement("span"); t.className = "t"; t.textContent = A.name;
       const m = document.createElement("span"); m.className = "m";
-      const last = num(kLast(s.id)), done = store.get(kDone(s.id), "") === "1";
-      m.textContent = done ? "পড়া হয়েছে" : last > 1 ? bn(Math.round(last / s.posts * 100)) + "%" : bn(s.posts) + " পোস্ট";
-      if (done) m.classList.add("done");
-      b.append(t, m);
-      if (last > 1 && !done){ const mini = document.createElement("span"); mini.className = "mini"; const i = document.createElement("i"); i.style.width = (last / s.posts * 100) + "%"; mini.append(i); b.append(mini); }
-      b.onclick = () => openStory(s.id);
-      box.append(b);
-    }
-    sec.append(h, box); vols.append(sec);
+      const read = A.stories.filter(s => store.get(kDone(s.id), "") === "1").length;
+      m.textContent = bn(A.stories.length) + "টি গল্প" + (read ? " · " + bn(read) + " পড়া" : "");
+      b.append(t, m); b.onclick = () => { location.hash = "author-" + i; };
+      return b;
+    });
+    vols.append(section("লেখক · " + bn(AUTHORS.length) + " জন · " + bn(CATALOG.length) + "টি গল্প", rows));
   }
-  renderShelf(q);
+  renderShelf(q || (AUTHOR !== null ? "author" : ""));
 }
 
 // ---------- continue-reading shelf ----------
@@ -381,10 +422,11 @@ function renderShelf(q){
     const card = document.createElement("div"); card.className = "scard";
     const open = document.createElement("button"); open.type = "button"; open.className = "open";
     const t = document.createElement("span"); t.className = "t"; t.textContent = s.title;
+    const au = document.createElement("span"); au.className = "snip"; au.textContent = s.author;
     const sn = document.createElement("span"); sn.className = "snip";
     sn.textContent = last > 1 ? bn(last) + " / " + bn(s.posts) + " · " + bn(Math.round(last / s.posts * 100)) + "%" : "শুরু হয়নি";
     const bar = document.createElement("span"); bar.className = "bar"; const i = document.createElement("i"); i.style.width = (last / s.posts * 100) + "%"; bar.append(i);
-    open.append(t, sn, bar); open.onclick = () => openStory(id);
+    open.append(t, au, sn, bar); open.onclick = () => openStory(id);
     const x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "×";
     x.setAttribute("aria-label", "Remove " + s.title + " from Continue reading");
     x.onclick = () => {
@@ -396,6 +438,7 @@ function renderShelf(q){
   }
 }
 $("#search").addEventListener("input", renderLibrary);
+$("#allAuthors").onclick = () => { location.hash = ""; };
 
 // ---------- reader ----------
 let STORY = null, ITEMS = [], READ = [], TOTAL = 0, rendered = 0, earmark = 0, focusN = 0, started = false;
@@ -425,11 +468,19 @@ function showLibrary(){
   STORY = null; $("#readView").hidden = true; $("#libView").hidden = false; document.title = "bongBoi";
   renderLibrary(); scrollTo(0,0);
 }
-$("#backBtn").onclick = () => { location.hash = ""; };
+$("#backBtn").onclick = () => {
+  const i = STORY ? AUTHORS.findIndex(A => A.name === STORY.author) : -1;
+  location.hash = i >= 0 && CAME_FROM_AUTHOR ? "author-" + i : "";
+};
+let CAME_FROM_AUTHOR = false;
+addEventListener("hashchange", e => { CAME_FROM_AUTHOR = /#author-\d+$/.test(e.oldURL || ""); }, {capture:true});
 addEventListener("hashchange", route);
 function route(){
   const id = location.hash.slice(1);
-  if (id && CATALOG.some(s => s.id === id)) openStory(id); else showLibrary();
+  if (id && CATALOG.some(s => s.id === id)) return openStory(id);
+  const a = /^author-(\d+)$/.exec(id);
+  AUTHOR = a && AUTHORS[+a[1]] ? +a[1] : null;
+  showLibrary();
 }
 
 function makePost(p){
@@ -467,7 +518,7 @@ new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) renderMore(
 function showEnd(){
   $("#endCard").hidden = false;
   $("#endDated").textContent = (STORY.dated ? STORY.dated + " · " : "") + "গল্প শেষ";
-  const i = CATALOG.findIndex(s => s.id === STORY.id), nx = CATALOG[i + 1];
+  const i = CATALOG.findIndex(s => s.id === STORY.id), nx = CATALOG[i + 1] && CATALOG[i + 1].author === STORY.author ? CATALOG[i + 1] : null;
   $("#nextBtn").hidden = !nx;
   if (nx){ $("#nextTitle").textContent = nx.title; $("#nextBtn").onclick = () => openStory(nx.id); }
 }
@@ -595,7 +646,7 @@ function prompt(kind, arg){
 function linkPrompt(){
   const lang = S.lang === "Bengali" ? "Answer in simple modern Bengali (চলিত ভাষা)." : "Answer in simple English.";
   const q = $("#askInput").value.trim();
-  const head = `I'm reading Tagore's story "${STORY.title}". This line: "${current.t.replace(/\n/g, " / ")}"`;
+  const head = `I'm reading the Bengali story "${STORY.title}" by ${STORY.author}. This line: "${current.t.replace(/\n/g, " / ")}"`;
   if (q) return `${head}\nMy question: ${q}\n${lang} Keep it short.`;
   if (selWord) return `${head}\nWhat does "${selWord}" mean here? Give its everyday (chalit) form too. ${lang} Keep it short.`;
   return `${head}\nRetell it in plain modern language and explain anything a modern reader might miss. ${lang} Keep it short.`;
@@ -640,7 +691,7 @@ $("#stopBtn").onclick = () => ctl?.abort();
 // ---------- boot ----------
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 applySettings();
-loadCatalog().then(ok => { if (ok) route(); });
+loadCatalog().then(ok => { if (ok){ buildAuthors(); route(); } });
 // Offline support when hosted on its own (e.g. GitHub Pages). Harmless where not allowed.
 if ("serviceWorker" in navigator && location.protocol === "https:" && !window.claude){
   navigator.serviceWorker.register("sw.js").catch(() => {});

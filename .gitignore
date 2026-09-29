@@ -2,3 +2,4 @@ __pycache__/
 stories/report.txt
 stories/inventory.tsv
 stories/refetch.txt
+_tagging/

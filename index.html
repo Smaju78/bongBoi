@@ -86,6 +86,18 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .row .m.done{color:var(--mark);font-weight:600}
 .row .mini{grid-column:1/-1;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
 .row .mini i{display:block;height:100%;background:var(--mark)}
+.row .bl{grid-column:1/-1;font-size:13px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.today{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;cursor:pointer;border-radius:16px;padding:16px;
+  background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--mark)}
+.today .eyebrow{font-size:12px;color:var(--mark);letter-spacing:.06em;font-weight:600}
+.today .tt{font-family:var(--story);font-size:26px;line-height:1.25}
+.today .ta{font-size:13px;color:var(--muted)}
+.today .tb{font-family:var(--story);font-size:16px;line-height:1.5;margin-top:4px}
+.today .go{margin-top:8px;font-size:14px;color:var(--accent);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer}
+.chip:hover{border-color:var(--accent);background:var(--accent-soft)}
+.chip.accent{border-color:var(--accent);color:var(--accent);font-weight:600}
 .row .by{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-2px}
 .row.author .t{font-size:19px}
 .authorhead{display:flex;align-items:center;gap:12px}
@@ -108,6 +120,9 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .post .meta button:hover{background:var(--accent-soft)}
 .post .meta .ear{color:var(--muted)}
 .post.marked{border-color:var(--mark)}
+.post.speaking{border-color:var(--mark);box-shadow:0 0 0 2px var(--mark-soft)}
+.pcols .pp.speaking{background:var(--accent-soft)}
+#speakBtn[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
 .post.marked::after{content:"";position:absolute;top:-1px;right:18px;width:14px;height:22px;background:var(--mark);
   clip-path:polygon(0 0,100% 0,100% 100%,50% 72%,0 100%)}
 .post.marked .meta .ear{color:var(--mark);font-weight:600}
@@ -203,7 +218,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
       </div>
       <input class="search" id="search" type="search" placeholder="Search stories or authors: kabuliwala, sukumar" aria-label="Search stories or authors">
       <div class="authorhead" id="authorHead" hidden>
-        <button class="iconbtn" id="allAuthors" type="button">‹ সব লেখক</button>
+        <button class="iconbtn" id="allAuthors" type="button">‹ ফিরে যান</button>
         <div><h1 id="authorName"></h1><p id="authorCount"></p></div>
       </div>
       <div id="vols"><p class="empty">Loading stories…</p></div>
@@ -220,6 +235,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
         <div class="bar"><i id="bar"></i></div>
       </div>
       <span class="prog" id="prog"></span>
+      <button class="iconbtn" id="speakBtn" type="button" aria-pressed="false" aria-label="Read aloud">🔊</button>
       <button class="iconbtn" data-open-settings type="button" aria-label="Settings">⚙</button>
     </header>
     <div id="reader">
@@ -299,6 +315,9 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
     <label for="focusMode">Focus
       <select id="focusMode"><option value="blur">Blur and fade</option><option value="dim">Fade only</option><option value="off">Off</option></select>
     </label>
+    <label for="rate">Read-aloud speed
+      <select id="rate"><option value="0.8">Slow</option><option value="1">Normal</option><option value="1.2">Fast</option></select>
+    </label>
     <label for="lang">Explain in
       <select id="lang"><option value="English">English</option><option value="Bengali">বাংলা</option></select>
     </label>
@@ -324,16 +343,16 @@ const kLast = id => "bb.last." + id, kEar = id => "bb.ear." + id, kDone = id => 
 const num = k => parseInt(store.get(k,"0"),10) || 0;
 
 // ---------- settings ----------
-const S = { mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","English"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur") };
+const S = { rate: store.get("sr.rate","1"), mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","English"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur") };
 function applySettings(){
   const r = document.documentElement;
   r.style.setProperty("--fs", S.size);
   if (S.theme) r.setAttribute("data-theme", S.theme); else r.removeAttribute("data-theme");
   document.body.classList.toggle("f-blur", S.focusMode === "blur");
   document.body.classList.toggle("f-dim", S.focusMode === "dim");
-  for (const k of ["mode","lang","size","theme","focusMode"]) $("#"+k).value = S[k];
+  for (const k of ["rate","mode","lang","size","theme","focusMode"]) $("#"+k).value = S[k];
 }
-for (const k of ["mode","lang","size","theme","focusMode"]) $("#"+k).addEventListener("change", e => {
+for (const k of ["rate","mode","lang","size","theme","focusMode"]) $("#"+k).addEventListener("change", e => {
   const here = STORY ? currentPost() : 1;
   S[k] = e.target.value; store.set(k === "focusMode" ? "sr.focus" : "sr."+k, S[k]); applySettings();
   if (STORY && (k === "mode" || k === "size")) applyMode(here); else updateFocus();
@@ -381,8 +400,27 @@ async function loadCatalog(){
     $("#vols").innerHTML = ""; const p = document.createElement("p"); p.className = "empty";
     p.textContent = "Couldn't load the story list. Check your connection and reload."; $("#vols").append(p); return false;
   }
+  try {                     // genres, mood and a one-line blurb per story (optional file)
+    const t = await fetch("stories/tags.json"); if (t.ok) TAGS = await t.json();
+  } catch(e){}
+  CATALOG = CATALOG.filter(s => !(TAGS[s.id] && TAGS[s.id].dup));
+  for (const s of CATALOG){ const t = TAGS[s.id]; s.g = t ? t.g : []; s.mood = t ? t.m : ""; s.blurb = t ? t.b : ""; }
   return true;
 }
+let TAGS = {};
+const MIN = s => Math.max(1, Math.round(s.posts * 8 / 60));            // rough reading minutes (~8 s a post)
+const GENRE = {romance:"প্রেমের গল্প", comedy:"হাসির গল্প", satire:"ব্যঙ্গ", historical:"ঐতিহাসিক", ghost:"ভূতের গল্প",
+  mystery:"রহস্য", fable:"নীতিকথা", fairytale:"রূপকথা", children:"ছোটদের", social:"সামাজিক", family:"পারিবারিক",
+  adventure:"অ্যাডভেঞ্চার", nature:"প্রকৃতি", mythology:"পুরাণ", memoir:"স্মৃতিকথা", science:"বিজ্ঞান", animal:"জীবজন্তু"};
+const MOOD = {light:"হালকা মেজাজ", funny:"মজার", moving:"মন-ছোঁয়া", sad:"করুণ", eerie:"গা-ছমছমে", thoughtful:"ভাবনার", tense:"টানটান"};
+const LISTS = [
+  {key:"short", name:"৫ মিনিটের গল্প", test: s => MIN(s) <= 5},
+  {key:"sitting", name:"এক বসায়", test: s => MIN(s) > 5 && MIN(s) <= 20},
+  {key:"long", name:"লম্বা গল্প", test: s => MIN(s) > 20},
+  ...Object.entries(GENRE).map(([k, n]) => ({key:"g-" + k, name:n, test: s => s.g.includes(k)})),
+  ...Object.entries(MOOD).map(([k, n]) => ({key:"m-" + k, name:n, test: s => s.mood === k})),
+];
+const isDone = s => store.get(kDone(s.id), "") === "1";
 // ---------- library: authors, one author's stories, or search results ----------
 let AUTHORS = [];          // [{name, stories:[...]}] most stories first
 function buildAuthors(){
@@ -398,10 +436,11 @@ function storyRow(s, showAuthor){
   const t = document.createElement("span"); t.className = "t"; t.textContent = s.title;
   const m = document.createElement("span"); m.className = "m";
   const last = num(kLast(s.id)), done = store.get(kDone(s.id), "") === "1";
-  m.textContent = done ? "পড়া হয়েছে" : last > 1 ? bn(Math.round(last / s.posts * 100)) + "%" : bn(s.posts) + " পোস্ট";
+  m.textContent = done ? "পড়া হয়েছে" : last > 1 ? bn(Math.round(last / s.posts * 100)) + "%" : "~" + bn(MIN(s)) + " মিনিট";
   if (done) m.classList.add("done");
   b.append(t, m);
   if (showAuthor){ const a = document.createElement("span"); a.className = "by"; a.textContent = s.author + (s.collection ? " · " + collName(s.collection, s.author) : ""); b.append(a); }
+  if (s.blurb && showAuthor !== "noblurb"){ const bl = document.createElement("span"); bl.className = "bl"; bl.textContent = s.blurb; b.append(bl); }
   if (last > 1 && !done){ const mini = document.createElement("span"); mini.className = "mini"; const i = document.createElement("i"); i.style.width = (last / s.posts * 100) + "%"; mini.append(i); b.append(mini); }
   b.onclick = () => openStory(s.id);
   return b;
@@ -413,10 +452,61 @@ function section(title, rows){
   sec.append(h, box); return sec;
 }
 let AUTHOR = null;         // index into AUTHORS when an author page is open
+let LIST = null;           // key of an open list (5-minute stories, a genre, a mood…)
+
+// Story of the day: same pick all day, changes at midnight; skips stories you've finished.
+function todayKey(){ const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); }
+function storyOfDay(){
+  const pool = CATALOG.filter(s => MIN(s) >= 4 && MIN(s) <= 25 && s.blurb);
+  const fresh = pool.filter(s => !isDone(s)); const use = fresh.length ? fresh : pool;
+  if (!use.length) return null;
+  let h = todayKey(); h = (h ^ (h >>> 7)) * 2654435761 >>> 0;
+  const pinned = store.get("bb.today", "");     // keep today's pick even after you finish it
+  const [pDay, pId] = pinned.split("|");
+  if (+pDay === todayKey()){ const s = CATALOG.find(x => x.id === pId); if (s) return s; }
+  const s = use[h % use.length]; store.set("bb.today", todayKey() + "|" + s.id); return s;
+}
+function chip(label, onClick, cls){
+  const c = document.createElement("button"); c.type = "button"; c.className = "chip" + (cls ? " " + cls : ""); c.textContent = label; c.onclick = onClick; return c;
+}
+function renderHomeExtras(vols){
+  const s = storyOfDay();
+  if (s){
+    const card = document.createElement("button"); card.type = "button"; card.className = "today";
+    const e = document.createElement("span"); e.className = "eyebrow"; e.textContent = "আজকের গল্প";
+    const t = document.createElement("span"); t.className = "tt"; t.textContent = s.title;
+    const a = document.createElement("span"); a.className = "ta"; a.textContent = s.author + " · ~" + bn(MIN(s)) + " মিনিট" + (s.g[0] ? " · " + GENRE[s.g[0]] : "");
+    const b = document.createElement("span"); b.className = "tb"; b.textContent = s.blurb;
+    const go = document.createElement("span"); go.className = "go"; go.textContent = isDone(s) ? "পড়া হয়েছে ✓ · আবার পড়ুন" : num(kLast(s.id)) > 1 ? "পড়া চালিয়ে যান →" : "পড়তে শুরু করুন →";
+    card.append(e, t, a, b, go); card.onclick = () => openStory(s.id);
+    vols.append(card);
+  }
+  const box = document.createElement("div"); box.className = "vol";
+  const h = document.createElement("h2"); h.textContent = "তালিকা";
+  const row = document.createElement("div"); row.className = "chips";
+  row.append(chip("🎲 যেকোনো একটা", surprise, "accent"));
+  for (const L of LISTS){
+    const n = CATALOG.filter(L.test).length; if (n < 4) continue;
+    row.append(chip(L.name + " · " + bn(n), () => { location.hash = "list-" + L.key; }));
+  }
+  box.append(h, row); vols.append(box);
+}
+function surprise(){
+  const pool = CATALOG.filter(s => !isDone(s) && num(kLast(s.id)) <= 1 && MIN(s) <= 20);
+  const s = (pool.length ? pool : CATALOG)[Math.floor(Math.random() * (pool.length || CATALOG.length))];
+  openStory(s.id);
+}
 function renderLibrary(){
   const q = $("#search").value.trim();
   const vols = $("#vols"); vols.textContent = "";
-  $("#authorHead").hidden = !(AUTHOR !== null && !q);
+  const L = LIST && LISTS.find(x => x.key === LIST);
+  $("#authorHead").hidden = !((AUTHOR !== null || L) && !q);
+  if (L && !q){
+    const list = CATALOG.filter(L.test).sort((a,b) => isDone(a) - isDone(b) || MIN(a) - MIN(b));
+    $("#authorName").textContent = L.name; $("#authorCount").textContent = bn(list.length) + "টি গল্প" + (L.key === "short" || L.key === "sitting" ? " · সময় আনুমানিক" : "");
+    vols.append(section(bn(list.filter(isDone).length) + "টি পড়া হয়েছে", list.map(s => storyRow(s, true))));
+    renderShelf("list"); return;
+  }
   if (q){
     const hits = CATALOG.filter(s => matches(s, q)).sort((a,b) => a._score - b._score);
     if (!hits.length){ const p = document.createElement("p"); p.className = "empty"; p.textContent = "No story or author matches “" + q + "”."; vols.append(p); }
@@ -437,6 +527,7 @@ function renderLibrary(){
       b.append(t, m); b.onclick = () => { location.hash = "author-" + i; };
       return b;
     });
+    renderHomeExtras(vols);
     vols.append(section("লেখক · " + bn(AUTHORS.length) + " জন · " + bn(CATALOG.length) + "টি গল্প", rows));
   }
   renderShelf(q || (AUTHOR !== null ? "author" : ""));
@@ -520,6 +611,8 @@ function route(){
   if (id && CATALOG.some(s => s.id === id)) return openStory(id);
   const a = /^author-(\d+)$/.exec(id);
   AUTHOR = a && AUTHORS[+a[1]] ? +a[1] : null;
+  const l = /^list-([a-z-]+)$/.exec(id);
+  LIST = l && LISTS.some(x => x.key === l[1]) ? l[1] : null;
   showLibrary();
 }
 
@@ -733,6 +826,40 @@ function welcome(){
   $("#back").hidden = false;
   ($("#goLast").hidden ? ($("#goEar").hidden ? $("#goStart") : $("#goEar")) : $("#goLast")).focus();
 }
+
+// ---------- read aloud (the phone's own Bengali voice) ----------
+const TTS = { on: false, n: 0, voice: null };
+function bnVoice(){
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v => /^bn[-_]IN/i.test(v.lang)) || vs.find(v => /^bn/i.test(v.lang)) || null;
+}
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { TTS.voice = bnVoice(); };
+function speakStop(){
+  TTS.on = false; if ("speechSynthesis" in window) speechSynthesis.cancel();
+  document.querySelectorAll(".speaking").forEach(e => e.classList.remove("speaking"));
+  $("#speakBtn").setAttribute("aria-pressed", "false");
+}
+function speakFrom(n){
+  if (!STORY || n > TOTAL){ speakStop(); return; }
+  TTS.n = n; document.querySelectorAll(".speaking").forEach(e => e.classList.remove("speaking"));
+  goTo(n);
+  (document.getElementById("p" + n) || pcols.querySelector('.pp[data-n="' + n + '"]'))?.classList.add("speaking");
+  if (S.mode === "pages") pcols.querySelector('.pp[data-n="' + n + '"]')?.classList.add("speaking");
+  const u = new SpeechSynthesisUtterance(READ[n - 1].t.replace(/\n/g, " "));
+  u.lang = "bn-IN"; if (TTS.voice) u.voice = TTS.voice; u.rate = +S.rate || 1;
+  u.onend = () => { if (TTS.on && TTS.n === n) speakFrom(n + 1); };
+  u.onerror = e => { if (TTS.on && e.error !== "interrupted" && e.error !== "canceled"){ toast("Read aloud stopped: " + e.error); speakStop(); } };
+  speechSynthesis.speak(u);
+}
+$("#speakBtn").onclick = () => {
+  if (!("speechSynthesis" in window)){ toast("This browser can't read aloud."); return; }
+  if (TTS.on){ speakStop(); return; }
+  TTS.voice = bnVoice();
+  if (!TTS.voice) toast("No Bengali voice found. It may sound odd; install Google's Bengali voice in phone settings.");
+  TTS.on = true; $("#speakBtn").setAttribute("aria-pressed", "true");
+  speakFrom(Math.max(1, currentPost()));
+};
+addEventListener("hashchange", speakStop);
 
 // ---------- sheets ----------
 function openSheet(id){ $("#scrim").hidden = false; $(id).hidden = false; }

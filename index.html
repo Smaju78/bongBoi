@@ -266,7 +266,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
         </div>
         <div id="todayBox"></div>
       </div>
-      <input class="search" id="search" type="search" placeholder="Search stories or authors: kabuliwala, sukumar" aria-label="Search stories or authors">
+      <input class="search" id="search" type="search" placeholder="Search" aria-label="Search">
       <div id="ctlAnchor"></div>
       <div class="controls" id="controls">
         <div class="tabs" id="tabs" role="tablist">
@@ -448,16 +448,33 @@ function skeleton(s){
     .replace(/gh/g,"g").replace(/th/g,"t").replace(/dh/g,"d").replace(/jh|z/g,"j").replace(/ng/g,"n").replace(/x/g,"ks")
     .replace(/[^a-z]/g,"").replace(/[aeiouywh]/g,"").replace(/(.)\1+/g,"$1");
 }
+// Score one piece of text against a search: 0 best, higher worse, null for no match.
+// A match must start at the beginning of a word, so "kabuli" doesn't hit "...k bhaluk".
+const SK = new Map();
+function textScore(text, q){
+  const lq = q.toLowerCase(), lt = text.toLowerCase();
+  if (lt.startsWith(lq)) return 0;
+  if (lt.includes(" " + lq) || (lq.length > 2 && lt.includes(lq))) return 1;
+  const k = skeleton(q);
+  if (k.length < 2) return toLatin(text).toLowerCase().split(/\s+/).some(w => w.startsWith(lq)) ? 2 : null;
+  if (!SK.has(text)) SK.set(text, text.split(/[\s\-–—,।]+/).map(skeleton).filter(Boolean));
+  const ws = SK.get(text);
+  for (let i = 0; i < ws.length; i++){ const tail = ws.slice(i).join(""); if (tail.startsWith(k)) return i === 0 ? (tail === k ? 0 : 1) : 2; }
+  return null;
+}
+// English names people type for some authors.
+const ALIAS = {"ঠাকুর":"tagore", "চট্টোপাধ্যায়":"chatterjee", "বন্দ্যোপাধ্যায়":"banerjee", "মুখোপাধ্যায়":"mukherjee",
+  "বসু":"bose", "চৌধুরী":"chowdhury", "ঈসপ":"aesop", "ল্যেভ তলস্তোয়":"leo tolstoy", "রাজশেখর বসু":"parashuram",
+  "হান্স ক্রিশ্চিয়ান অ্যান্ডারসন":"hans christian andersen"};
+const AK = new Map();
+function authorKey(n){
+  if (!AK.has(n)){ let x = n; for (const [b, e] of Object.entries(ALIAS)) if (n.includes(b)) x += " " + e; AK.set(n, x); }
+  return AK.get(n);
+}
 function matches(s, q){
   if (!q) return true;
-  s._score = 3;
-  if (s.title.includes(q)){ s._score = s.title.startsWith(q) ? 0 : 1; return true; }
-  if (s.author.includes(q)){ s._score = 3; return true; }
-  const k = skeleton(q); if (k.length < 2) return toLatin(s.title).toLowerCase().includes(q.toLowerCase());
-  s._sk = s._sk || skeleton(s.title);
-  s._ska = s._ska || skeleton(s.author);
-  if (s._sk.includes(k)){ s._score = s._sk === k ? 0 : s._sk.startsWith(k) ? 1 : 2; return true; }
-  if (s._ska.includes(k)){ s._score = s._ska.startsWith(k) ? 0.5 : 3; return true; }
+  const t = textScore(s.title, q); if (t !== null){ s._score = t; return true; }
+  const a = textScore(authorKey(s.author), q); if (a !== null){ s._score = a === 0 ? 0.5 : 3; return true; }
   return false;
 }
 
@@ -600,10 +617,13 @@ function renderToday(){
     el("span", "go", isDone(s) ? "Read ✓ · read again" : num(kLast(s.id)) > 1 ? "Continue →" : "Start reading →"));
   card.onclick = () => openStory(s.id); box.append(card);
 }
+// The stories the tag picker and 🎲 work on: this author, or what the current tab and search show.
 function scope(){
   const q = $("#search").value.trim();
-  if (AUTHOR !== null) return AUTHORS[AUTHOR].stories;
-  return q ? CATALOG.filter(s => matches(s, q)) : CATALOG;
+  if (AUTHOR !== null){ const st = AUTHORS[AUTHOR].stories; return q ? st.filter(s => textScore(s.title, q) !== null) : st; }
+  if (!q) return CATALOG;
+  if (TAB === "authors") return AUTHORS.filter(A => textScore(authorKey(A.name), q) !== null).flatMap(A => A.stories);
+  return CATALOG.filter(s => matches(s, q));
 }
 $("#surpriseBtn").onclick = () => {
   const all = scope().filter(s => fits(s));
@@ -619,37 +639,56 @@ let TAB = store.get("bb.tab", "authors") === "stories" ? "stories" : "authors";
 function renderLibrary(){
   const q = $("#search").value.trim(), A = AUTHOR !== null ? AUTHORS[AUTHOR] : null;
   $("#brandBox").hidden = !!A; $("#authorBack").hidden = !A; $("#authorBox").hidden = !A;
-  $("#homeTop").hidden = !!A || !!q; $("#search").hidden = !!A; $("#tabs").hidden = !!A || !!q;
+  $("#homeTop").hidden = !!A || !!q; $("#tabs").hidden = !!A;
+  $("#search").placeholder = A ? "Search this author's stories" : TAB === "authors" ? "Search authors: sarat, tagore, sukumar" : "Search stories: kabuliwala, mahesh";
+  $("#search").setAttribute("aria-label", $("#search").placeholder);
   for (const t of document.querySelectorAll("#tabs [data-tab]")) t.setAttribute("aria-selected", t.dataset.tab === TAB ? "true" : "false");
   renderFilters();
   const vols = $("#vols"); vols.textContent = "";
+  const tagsNote = SEL.size ? " with these tags" : "";
   let letters = [], shown = 0, count = "";
-  if (q){
-    const hits = CATALOG.filter(s => matches(s, q) && fits(s)).sort((a, b) => a._score - b._score);
-    if (!hits.length) vols.append(emptyNote("No story or author matches “" + q + "”" + (SEL.size ? " with these tags." : ".")));
-    else {
-      count = plural(hits.length, "story", "stories") + " found" + (SEL.size ? " with these tags" : "");
-      const box = el("div", "list"); hits.slice(0, 200).forEach(s => box.append(storyRow(s, true))); vols.append(box);
-    }
-  } else if (A){
-    const list = A.stories.filter(s => fits(s)); shown = list.length;
+  const flat = rows => { const box = el("div", "list"); rows.forEach(r => box.append(r)); vols.append(box); };
+  if (A){
+    const all = A.stories.filter(s => fits(s));
+    let list = all;
+    if (q) list = all.map(s => [s, textScore(s.title, q)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+    shown = list.length;
     $("#authorName").textContent = A.name;
-    $("#authorCount").textContent = (SEL.size ? list.length + " of " : "") + plural(A.stories.length, "story", "stories") + (SEL.size ? " match" : "");
+    $("#authorCount").textContent = (SEL.size ? all.length + " of " : "") + plural(A.stories.length, "story", "stories") + (SEL.size ? " match" : "");
     document.title = A.name + " · bongBoi";
-    if (!list.length) vols.append(emptyNote("No stories by " + A.name + " with these tags."));
-    letters = lettered(list, s => s.title, s => storyRow(s, false));
+    if (q){
+      if (list.length){ count = plural(list.length, "story", "stories") + " found" + tagsNote; flat(list.map(s => storyRow(s, false))); }
+      else vols.append(emptyNote("No story by " + A.name + " matches “" + q + "”" + tagsNote + "."));
+    } else {
+      if (!list.length) vols.append(emptyNote("No stories by " + A.name + " with these tags."));
+      letters = lettered(list, s => s.title, s => storyRow(s, false));
+    }
   } else if (TAB === "authors"){
-    const rows = [];
+    let rows = [];
     AUTHORS.forEach((A, i) => { const n = SEL.size ? A.stories.filter(s => fits(s)).length : A.stories.length; if (n) rows.push({A, i, n}); });
+    if (q) rows = rows.map(x => (x.sc = textScore(authorKey(x.A.name), q), x)).filter(x => x.sc !== null).sort((a, b) => a.sc - b.sc);
     shown = rows.length;
-    count = plural(rows.length, "author", "authors") + " · " + plural(rows.reduce((t, x) => t + x.n, 0), "story", "stories") + (SEL.size ? " match" : "");
-    if (!rows.length) vols.append(emptyNote("No stories match these tags."));
-    letters = lettered(rows, x => x.A.name, x => authorRow(x.A, x.i, x.n));
+    const stories = plural(rows.reduce((t, x) => t + x.n, 0), "story", "stories");
+    if (q){
+      if (rows.length){ count = plural(rows.length, "author", "authors") + " found · " + stories + tagsNote; flat(rows.map(x => authorRow(x.A, x.i, x.n))); }
+      else vols.append(emptyNote("No author matches “" + q + "”" + tagsNote + "."));
+    } else {
+      count = plural(rows.length, "author", "authors") + " · " + stories + (SEL.size ? " match" : "");
+      if (!rows.length) vols.append(emptyNote("No stories match these tags."));
+      letters = lettered(rows, x => x.A.name, x => authorRow(x.A, x.i, x.n));
+    }
   } else {
-    const list = STORIES_AZ.filter(s => fits(s)); shown = list.length;
-    count = plural(list.length, "story", "stories") + (SEL.size ? " match" : ", A–Z");
-    if (!list.length) vols.append(emptyNote("No stories match these tags."));
-    letters = lettered(list, s => s.title, s => storyRow(s, true));
+    if (q){
+      const hits = CATALOG.filter(s => fits(s) && matches(s, q)).sort((a, b) => a._score - b._score);
+      shown = hits.length;
+      if (hits.length){ count = plural(hits.length, "story", "stories") + " found" + tagsNote; flat(hits.slice(0, 200).map(s => storyRow(s, true))); }
+      else vols.append(emptyNote("No story matches “" + q + "”" + tagsNote + "."));
+    } else {
+      const list = STORIES_AZ.filter(s => fits(s)); shown = list.length;
+      count = plural(list.length, "story", "stories") + (SEL.size ? " match" : ", A–Z");
+      if (!list.length) vols.append(emptyNote("No stories match these tags."));
+      letters = lettered(list, s => s.title, s => storyRow(s, true));
+    }
   }
   $("#countLine").textContent = count; $("#countLine").hidden = !count;
   buildAZ(shown > 20 ? letters : []);
@@ -812,6 +851,7 @@ addEventListener("hashchange", e => {
   if (!/^ws-/.test(old)) SCROLL[old] = scrollY;
   if (/^ws-/.test(now) && !/^ws-/.test(old)) CAME_FROM_AUTHOR = /^author-\d+$/.test(old);
   RESTORE = /^ws-/.test(old) || now === "";
+  if (!/^ws-/.test(old) && !/^ws-/.test(now) && old !== now) $("#search").value = "";
 }, {capture:true});
 addEventListener("hashchange", route);
 function route(){

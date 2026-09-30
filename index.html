@@ -156,7 +156,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .intro{margin:18px 0 0;color:var(--muted);font-size:13px}
 .feed{display:flex;flex-direction:column;gap:12px;margin-top:14px}
 .post{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:16px 16px 16px 4px;
-  padding:12px 14px 8px;cursor:pointer;transition:filter .3s,opacity .3s,border-color .3s,box-shadow .3s}
+  padding:12px 14px 8px;transition:filter .3s,opacity .3s,border-color .3s,box-shadow .3s}
 .post .txt{font-family:var(--story);font-size:var(--fs);line-height:1.7;margin:0;text-wrap:pretty;white-space:pre-line}
 .post.dialogue{border-left:3px solid var(--accent)}
 .post .meta{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -299,7 +299,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
       <button class="iconbtn" data-open-settings type="button" aria-label="Settings">⚙</button>
     </header>
     <div id="reader">
-      <p class="intro">Scroll to read. Tap a post to ask what a word or line means.</p>
+      <p class="intro">Scroll to read. Tap Ask on any post to have ChatGPT explain it.</p>
       <div class="feed" id="feed"></div>
       <div class="sentinel" id="sentinel"></div>
       <div class="loading" id="loading" hidden>Loading more…</div>
@@ -317,6 +317,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
     <button class="iconbtn pnav" id="pPrev" type="button" aria-label="Previous page">‹</button>
     <div class="pmid"><input type="range" id="pSlider" min="1" max="1" value="1" aria-label="Go to page"><span id="pNum"></span></div>
     <button class="iconbtn" id="pEar" type="button">Earmark</button>
+    <button class="iconbtn" id="pAsk" type="button" aria-label="Ask ChatGPT about this page">Ask AI</button>
     <button class="iconbtn pnav" id="pNext" type="button" aria-label="Next page">›</button>
   </div>
 </div>
@@ -333,35 +334,6 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
 
 <div class="toast" id="toast" hidden></div>
 <div class="scrim" id="scrim" hidden></div>
-
-<section class="sheet" id="askSheet" hidden aria-label="Ask about this post">
-  <div class="inner">
-    <div class="rowx" style="justify-content:space-between">
-      <h2 id="askHead">Post</h2>
-      <button class="iconbtn" data-close type="button">Close</button>
-    </div>
-    <div class="quote" id="askQuote"></div>
-    <div>
-      <div class="note" style="margin-bottom:6px">Tap a word to get its meaning</div>
-      <div class="words" id="askWords"></div>
-      <div class="rowx" style="margin-top:12px"><button class="btn" id="explainPost" type="button">Explain this post</button></div>
-      <div class="askrow" style="margin-top:10px">
-        <input id="askInput" type="text" placeholder="Ask your own question">
-        <button class="btn ghost" id="askGo" type="button">Ask</button>
-      </div>
-    </div>
-    <div class="elsewhere">
-      <span class="note" id="elseLbl">Or ask in your own app</span>
-      <div class="rowx">
-        <a class="btn ghost" id="toGPT" href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT ↗</a>
-        <a class="btn ghost" id="toClaude" href="https://claude.ai/new" target="_blank" rel="noopener">Claude ↗</a>
-      </div>
-    </div>
-    <div class="answer" id="answer" hidden></div>
-    <div class="rowx" id="stopRow" hidden><button class="iconbtn" id="stopBtn" type="button">Stop</button></div>
-    <p class="note" id="aiNote" hidden></p>
-  </div>
-</section>
 
 <section class="sheet" id="tagSheet" hidden aria-label="Filter by tags">
   <div class="inner">
@@ -873,9 +845,8 @@ function makePost(p){
   ear.textContent = p.n === earmark ? "Earmarked" : "Earmark"; ear.setAttribute("aria-pressed", p.n === earmark ? "true" : "false");
   ear.addEventListener("click", e => { e.stopPropagation(); toggleEar(p.n); });
   const ask = document.createElement("button"); ask.type = "button"; ask.textContent = "Ask";
-  ask.addEventListener("click", e => { e.stopPropagation(); openAsk(p); });
+  ask.addEventListener("click", e => { e.stopPropagation(); askGPT(p.t); });
   m.append(n, ear, ask); d.append(t, m);
-  d.addEventListener("click", () => { if (!getSelection().toString()) openAsk(p); });
   return d;
 }
 function renderMore(count = BATCH){
@@ -1010,7 +981,7 @@ $("#pEar").onclick = () => {
   const n = earmark && pageOfPost(earmark) === PG.page ? earmark : firstPostOnPage(PG.page);
   toggleEar(n); goPage(PG.page);
 };
-// tap left edge = back, right edge = forward, middle = ask about that paragraph; swipe to turn
+// tap left edge = back, right edge = forward; swipe to turn
 let swipe = null;
 pview.addEventListener("pointerdown", e => { swipe = {x: e.clientX, y: e.clientY, t: Date.now()}; });
 pview.addEventListener("pointerup", e => {
@@ -1022,10 +993,9 @@ pview.addEventListener("pointerup", e => {
   const r = pview.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
   if (x < 0.25) return goPage(PG.page - 1);
   if (x > 0.75) return goPage(PG.page + 1);
-  const el = e.target.closest?.(".pp"); if (el) openAsk(READ[+el.dataset.n - 1]);
 });
 document.addEventListener("keydown", e => {
-  if (S.mode !== "pages" || !STORY || !$("#askSheet").hidden || !$("#setSheet").hidden || !$("#back").hidden) return;
+  if (S.mode !== "pages" || !STORY || !$("#setSheet").hidden || !$("#back").hidden) return;
   if (e.target.matches?.("input,select,textarea")) return;
   if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); goPage(PG.page + 1); }
   if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); goPage(PG.page - 1); }
@@ -1109,98 +1079,27 @@ addEventListener("hashchange", speakStop);
 
 // ---------- sheets ----------
 function openSheet(id){ $("#scrim").hidden = false; $(id).hidden = false; }
-function closeSheets(){ ctl?.abort(); $("#scrim").hidden = true; $("#askSheet").hidden = true; $("#setSheet").hidden = true; $("#tagSheet").hidden = true; }
+function closeSheets(){ $("#scrim").hidden = true; $("#setSheet").hidden = true; $("#tagSheet").hidden = true; }
 $("#scrim").onclick = closeSheets;
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheets);
 document.querySelectorAll("[data-open-settings]").forEach(b => b.onclick = () => openSheet("#setSheet"));
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheets(); });
 
-// ---------- asking ----------
-let sample = null, ctl = null, current = null, selWord = "";
-const aiReady = (window.claude?.use ? window.claude.use("sample") : Promise.resolve(null)).then(s => { sample = s; return s; }).catch(() => null);
-
-function openAsk(p){
-  current = p; selWord = "";
-  $("#askHead").textContent = "Post " + String(p.n);
-  $("#askQuote").textContent = p.t;
-  const words = $("#askWords"); words.textContent = "";
-  const seen = new Set();
-  for (const raw of p.t.split(/\s+/)){
-    const w = raw.replace(/^[“‘'(—]+|[”’'),;।?!—:]+$/g, "");
-    if (!w || w.length < 2 || seen.has(w)) continue; seen.add(w);
-    const b = document.createElement("button"); b.type = "button"; b.className = "w"; b.textContent = w;
-    b.onclick = () => {
-      const was = b.classList.contains("on");
-      words.querySelectorAll(".on").forEach(x => x.classList.remove("on"));
-      if (was && !sample) selWord = ""; else { b.classList.add("on"); selWord = w; }
-      updateLinks(); if (sample) ask("word", w);
-    };
-    words.append(b);
-  }
-  $("#explainPost").disabled = false; $("#askGo").disabled = false;
-  $("#answer").hidden = true; $("#answer").textContent = ""; $("#aiNote").hidden = true; $("#askInput").value = "";
-  updateLinks(); openSheet("#askSheet");
-  aiReady.then(s => { if (!s) showUnavailable(); });
-}
-function showUnavailable(){
-  $("#explainPost").disabled = true; $("#askGo").disabled = true;
-  const n = $("#aiNote"); n.hidden = false; n.textContent = "Built-in explanations aren't available here. Pick a word or type a question, then use ChatGPT or Claude below.";
-}
-function context(p){
-  const prev = READ[p.n - 2]?.t || "", next = READ[p.n]?.t || "";
-  return `Story: "${STORY.title}" by ${STORY.author} (Bengali, sadhu or chalit bhasha${STORY.dated ? ", written " + STORY.dated : ""}).\nPrevious post: ${prev}\nThis post: ${p.t}\nNext post: ${next}`;
-}
-function prompt(kind, arg){
-  const lang = S.lang === "Bengali" ? "simple modern spoken Bengali (চলিত ভাষা), in Bengali script" : "simple English";
-  const base = `You help an adult reader enjoy a classic Bengali story. Answer in ${lang}. Plain text only, no markdown, no headings. Be brief and warm, like a well-read friend.\n\n${context(current)}\n\n`;
-  if (kind === "word") return base + `Explain the word "${arg}" as used in this post: its meaning here, its everyday (chalit) form if it is sadhu bhasha, and one line on why it fits. At most 4 short lines.`;
-  if (kind === "post") return base + `Explain this post: first retell it in plain modern language, then note anything a modern reader might miss (old words, customs, humour, tone). At most 7 short lines.`;
-  return base + `The reader asks: ${arg}\nAnswer about this post. If the question needs more of the story, say what you can from the post and context. At most 7 short lines.`;
-}
-function linkPrompt(){
+// ---------- ask ChatGPT: one tap opens a temporary chat with the question already asked ----------
+function askGPT(text){
   const lang = S.lang === "Bengali" ? "Answer in simple modern Bengali (চলিত ভাষা)." : "Answer in simple English.";
-  const q = $("#askInput").value.trim();
-  const head = `I'm reading the Bengali story "${STORY.title}" by ${STORY.author}. This line: "${current.t.replace(/\n/g, " / ")}"`;
-  if (q) return `${head}\nMy question: ${q}\n${lang} Keep it short.`;
-  if (selWord) return `${head}\nWhat does "${selWord}" mean here? Give its everyday (chalit) form too. ${lang} Keep it short.`;
-  return `${head}\nRetell it in plain modern language and explain anything a modern reader might miss. ${lang} Keep it short.`;
+  const q = `I'm reading the Bengali story "${STORY.title}" by ${STORY.author}${STORY.dated ? " (written " + STORY.dated + ")" : ""}. Here is a passage:\n\n${text}\n\n` +
+    `Retell it in plain modern language, then explain anything a modern reader might miss (old words, customs, humour, tone). ${lang} Keep it short.`;
+  window.open("https://chatgpt.com/?temporary-chat=true&q=" + encodeURIComponent(q), "_blank", "noopener");
 }
-function updateLinks(){
-  if (!current) return;
-  const p = encodeURIComponent(linkPrompt());
-  $("#toGPT").href = "https://chatgpt.com/?q=" + p;
-  $("#toClaude").href = "https://claude.ai/new?q=" + p;
-  const q = $("#askInput").value.trim();
-  $("#elseLbl").textContent = q ? "Or ask your question in your own app" : selWord ? `Or ask about “${selWord}” in your own app` : "Or get this post explained in your own app";
+// The paragraphs you can see on the current page, including one carried over from the page before.
+function pageText(p){
+  const base = pcols.getBoundingClientRect().left, step = PG.w + PG.gap, out = [];
+  for (const el of pcols.querySelectorAll(".pp"))
+    if ([...el.getClientRects()].some(r => Math.floor((r.left - base + 2) / step) === p)) out.push(el.textContent);
+  return out.join("\n\n");
 }
-$("#askInput").addEventListener("input", updateLinks);
-const ERR = { rate_limited:"Too many questions at once. Wait a minute, then ask again.", session_expired:"You've been signed out. Sign in again, then ask.",
-  refused:"Claude couldn't answer that. Try asking it a different way.", empty_completion:"No answer came back. Try a shorter question." };
-async function ask(kind, arg){
-  const s = await aiReady; if (!s) return showUnavailable();
-  ctl?.abort(); ctl = new AbortController();
-  const out = $("#answer"); out.hidden = false; out.textContent = "";
-  const lbl = document.createElement("span"); lbl.className = "lbl";
-  lbl.textContent = kind === "word" ? "Meaning of " + arg : kind === "post" ? "This post, explained" : "Your question";
-  const body = document.createElement("span"); body.textContent = "Thinking…"; out.append(lbl, body);
-  $("#stopRow").hidden = false; $("#aiNote").hidden = true;
-  try {
-    const r = await s(prompt(kind, arg), { signal: ctl.signal, modelTier: kind === "word" ? "quick" : "default",
-      cache: kind === "free" ? false : true, onText: ({text}) => { body.textContent = text; } });
-    if (r.truncated){ $("#aiNote").hidden = false; $("#aiNote").textContent = "The answer was cut short."; }
-  } catch(e){
-    body.textContent = e?.text || "";
-    if (e?.code && e.code !== "cancelled"){
-      if (["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(e.code)) showUnavailable();
-      else { $("#aiNote").hidden = false; $("#aiNote").textContent = ERR[e.code] || "Something went wrong. Try again in a moment."; }
-    }
-    if (!body.textContent) out.hidden = e?.code === "cancelled";
-  } finally { $("#stopRow").hidden = true; }
-}
-$("#explainPost").onclick = () => ask("post");
-$("#askGo").onclick = () => { const q = $("#askInput").value.trim(); if (q) ask("free", q); };
-$("#askInput").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("#askGo").click(); } });
-$("#stopBtn").onclick = () => ctl?.abort();
+$("#pAsk").onclick = () => { const t = pageText(PG.page); if (t) askGPT(t); else toast("Nothing to ask about on this page."); };
 
 // ---------- boot ----------
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";

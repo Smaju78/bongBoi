@@ -1,7 +1,9 @@
 {
+  "id": "/bongBoi/",
   "name": "bongBoi",
   "short_name": "bongBoi",
-  "description": "Tagore's stories as a feed of short posts",
+  "description": "Classic Bengali short stories, read as short posts",
+  "categories": ["books", "education"],
   "lang": "bn",
   "start_url": "./",
   "scope": "./",

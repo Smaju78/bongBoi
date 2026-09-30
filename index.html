@@ -363,8 +363,8 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
     <label for="rate">Read-aloud speed
       <select id="rate"><option value="0.8">Slow</option><option value="1">Normal</option><option value="1.2">Fast</option></select>
     </label>
-    <label for="lang">Explain in
-      <select id="lang"><option value="English">English</option><option value="Bengali">Bengali</option></select>
+    <label for="lang">AI answers in
+      <select id="lang"><option value="Bengali">Colloquial Bengali</option><option value="English">English</option></select>
     </label>
     <label for="size">Text size
       <select id="size"><option value="17px">Small</option><option value="19px">Medium</option><option value="22px">Large</option></select>
@@ -386,7 +386,7 @@ const kLast = id => "bb.last." + id, kEar = id => "bb.ear." + id, kDone = id => 
 const num = k => parseInt(store.get(k,"0"),10) || 0;
 
 // ---------- settings ----------
-const S = { rate: store.get("sr.rate","1"), mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","English"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur") };
+const S = { rate: store.get("sr.rate","1"), mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","Bengali"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur") };
 function applySettings(){
   const r = document.documentElement;
   r.style.setProperty("--fs", S.size);
@@ -1087,10 +1087,12 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheets(
 
 // ---------- ask ChatGPT: one tap opens a temporary chat with the question already asked ----------
 function askGPT(text){
-  const lang = S.lang === "Bengali" ? "Answer in simple modern Bengali (চলিত ভাষা)." : "Answer in simple English.";
+  const lang = S.lang === "Bengali" ? "Answer in colloquial spoken Bengali (চলিত কথ্য বাংলা), the way you'd explain it to a friend, in Bengali script." : "Answer in simple English.";
   const q = `I'm reading the Bengali story "${STORY.title}" by ${STORY.author}${STORY.dated ? " (written " + STORY.dated + ")" : ""}. Here is a passage:\n\n${text}\n\n` +
     `Retell it in plain modern language, then explain anything a modern reader might miss (old words, customs, humour, tone). ${lang} Keep it short.`;
-  window.open("https://chatgpt.com/?temporary-chat=true&q=" + encodeURIComponent(q), "_blank", "noopener");
+  // A named tab: every Ask loads in the same ChatGPT tab instead of opening a new one.
+  const w = window.open("https://chatgpt.com/?temporary-chat=true&q=" + encodeURIComponent(q), "bongboi-ai");
+  if (w){ try { w.focus(); } catch(e){} }
 }
 // The paragraphs you can see on the current page, including one carried over from the page before.
 function pageText(p){

@@ -1044,7 +1044,7 @@ addEventListener("hashchange", speakStop);
 // Made live by the phone's sound engine (no files). The story's tags pick the mood.
 // Trial: Ghost or Eerie stories get the eerie score, everything else the light one.
 const BGM = { ctx: null, out: null, stop: null, dest: null };
-const LEVEL = { soft: 0.343, medium: 0.49 };     // volume after the leveller; Soft is 30% below Medium
+const LEVEL = { soft: 0.24, medium: 0.343 };     // volume after the leveller; Soft is 30% below Medium
 const hz = m => 440 * Math.pow(2, (m - 69) / 12);            // note number → pitch
 function bgmKind(){
   const meta = STORY && CATALOG.find(s => s.id === STORY.id);
@@ -1061,7 +1061,7 @@ function bgmStart(kind){
   const out = ctx.createGain(); out.gain.value = 0;     // fades and the Soft/Medium volume live here, after the leveller
   comp.connect(out); out.connect(BGM.dest || ctx.destination);
   const into = ctx.createGain(); into.gain.value = 0.7; into.connect(comp);
-  out.gain.linearRampToValueAtTime(LEVEL[S.music] || 0.343, ctx.currentTime + 4);   // slow fade in
+  out.gain.linearRampToValueAtTime(LEVEL[S.music] || 0.24, ctx.currentTime + 4);   // slow fade in
   // a soft room echo, made from decaying noise
   const len = ctx.sampleRate * 3.5, buf = ctx.createBuffer(2, len, ctx.sampleRate);
   for (let c = 0; c < 2; c++){ const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5); }

@@ -1005,14 +1005,14 @@ function welcome(){
 }
 
 // ---------- read aloud (the phone's own Bengali voice) ----------
-const TTS = { on: false, n: 0, voice: null };
+const TTS = { on: false, n: 0, voice: null, words: false, cps: 14, timers: [] };   // cps: characters per second at normal speed, learned as it reads
 function bnVoice(){
   const vs = speechSynthesis.getVoices();
   return vs.find(v => /^bn[-_]IN/i.test(v.lang)) || vs.find(v => /^bn/i.test(v.lang)) || null;
 }
 if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { TTS.voice = bnVoice(); };
 function speakStop(){
-  TTS.on = false; if ("speechSynthesis" in window) speechSynthesis.cancel();
+  TTS.on = false; TTS.timers.forEach(clearTimeout); TTS.timers = []; if ("speechSynthesis" in window) speechSynthesis.cancel();
   bgmStop();
   document.querySelectorAll(".speaking").forEach(e => e.classList.remove("speaking"));
   $("#speakBtn").setAttribute("aria-pressed", "false");
@@ -1025,9 +1025,42 @@ function speakFrom(n){
   if (S.mode === "pages") pcols.querySelector('.pp[data-n="' + n + '"]')?.classList.add("speaking");
   const u = new SpeechSynthesisUtterance(READ[n - 1].t.replace(/\n/g, " "));
   u.lang = "bn-IN"; if (TTS.voice) u.voice = TTS.voice; u.rate = +S.rate || 1;
-  u.onend = () => { if (TTS.on && TTS.n === n) speakFrom(n + 1); };
+  // Pages mode: a post can start at the foot of one page and run onto the next. Turn the page
+  // when the voice gets there: by the word the phone says it is on, or else by timing.
+  TTS.timers.forEach(clearTimeout); TTS.timers = [];
+  const breaks = S.mode === "pages" ? pageBreaksIn(n) : [];
+  let began = 0;
+  u.onstart = () => {
+    began = performance.now();
+    if (!TTS.words) for (const b of breaks)
+      TTS.timers.push(setTimeout(() => { if (TTS.on && TTS.n === n && !TTS.words && PG.page < b.page) goPage(b.page); }, b.at / (TTS.cps * u.rate) * 1000));
+  };
+  u.onboundary = e => {
+    if (e.charIndex > 0 && !TTS.words){ TTS.words = true; TTS.timers.forEach(clearTimeout); TTS.timers = []; }
+    while (breaks.length && e.charIndex >= breaks[0].at){ const b = breaks.shift(); if (TTS.on && TTS.n === n && PG.page < b.page) goPage(b.page); }
+  };
+  u.onend = () => {
+    const secs = (performance.now() - began) / 1000, len = READ[n - 1].t.length;
+    if (began && secs > 2 && len > 30) TTS.cps = TTS.cps * 0.7 + (len / secs / u.rate) * 0.3;   // learn this voice's pace
+    if (TTS.on && TTS.n === n) speakFrom(n + 1);
+  };
   u.onerror = e => { if (TTS.on && e.error !== "interrupted" && e.error !== "canceled"){ toast("Read aloud stopped: " + e.error); speakStop(); } };
   speechSynthesis.speak(u);
+}
+// Where a post's text crosses onto a later page: [{at: character index, page}], in order.
+function pageBreaksIn(n){
+  const el = pcols.querySelector('.pp[data-n="' + n + '"]'), node = el && el.firstChild;
+  if (!node || node.nodeType !== 3) return [];
+  const base = pcols.getBoundingClientRect().left, step = PG.w + PG.gap, len = node.length, r = document.createRange();
+  const pageAt = i => { r.setStart(node, i); r.setEnd(node, Math.min(len, i + 1)); const b = r.getClientRects()[0] || r.getBoundingClientRect();
+    return Math.floor((b.left - base + 2) / step); };
+  const out = []; let from = 0, page = pageAt(0), last = pageAt(len - 1);
+  while (page < last){                                   // binary search for the first character on the next page
+    let lo = from, hi = len - 1;
+    while (lo < hi){ const mid = (lo + hi) >> 1; if (pageAt(mid) > page) hi = mid; else lo = mid + 1; }
+    page = pageAt(lo); out.push({at: lo, page}); from = lo;
+  }
+  return out;
 }
 $("#speakBtn").onclick = () => {
   if (!("speechSynthesis" in window)){ toast("This browser can't read aloud."); return; }

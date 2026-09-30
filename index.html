@@ -1042,13 +1042,15 @@ addEventListener("hashchange", speakStop);
 
 // ---------- background music for read aloud ----------
 // Made live by the phone's sound engine (no files). The story's tags pick the mood.
-// Trial: Ghost or Eerie stories get the eerie score, everything else the light one.
+// Ghost or Eerie stories get the eerie score; otherwise the story's mood picks one of seven scores.
 const BGM = { ctx: null, out: null, stop: null, dest: null };
 const LEVEL = { soft: 0.24, medium: 0.343 };     // volume after the leveller; Soft is 30% below Medium
 const hz = m => 440 * Math.pow(2, (m - 69) / 12);            // note number → pitch
 function bgmKind(){
   const meta = STORY && CATALOG.find(s => s.id === STORY.id);
-  return meta && (meta.g.includes("ghost") || meta.mood === "eerie") ? "eerie" : "light";
+  if (!meta) return "light";
+  if (meta.g.includes("ghost") || meta.mood === "eerie") return "eerie";
+  return SCORES[meta.mood] ? meta.mood : "light";
 }
 function bgmLevel(){ const o = BGM.out; if (!o) return; const t = BGM.ctx.currentTime;
   o.gain.cancelScheduledValues(t); o.gain.setValueAtTime(o.gain.value, t); o.gain.linearRampToValueAtTime(LEVEL[S.music] || 0, t + 1); }
@@ -1060,14 +1062,15 @@ function bgmStart(kind){
   comp.threshold.value = -24; comp.ratio.value = 4; comp.attack.value = 0.05; comp.release.value = 0.4;
   const out = ctx.createGain(); out.gain.value = 0;     // fades and the Soft/Medium volume live here, after the leveller
   comp.connect(out); out.connect(BGM.dest || ctx.destination);
-  const into = ctx.createGain(); into.gain.value = 0.7; into.connect(comp);
+  const k = SCORES[kind] ? kind : bgmKind();
+  const into = ctx.createGain(); into.gain.value = 0.7 * (TRIM[k] || 1); into.connect(comp);   // TRIM evens out loudness between moods
   out.gain.linearRampToValueAtTime(LEVEL[S.music] || 0.24, ctx.currentTime + 4);   // slow fade in
   // a soft room echo, made from decaying noise
   const len = ctx.sampleRate * 3.5, buf = ctx.createBuffer(2, len, ctx.sampleRate);
   for (let c = 0; c < 2; c++){ const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5); }
   const wet = ctx.createConvolver(); wet.buffer = buf; const wg = ctx.createGain(); wg.gain.value = 0.6; wet.connect(wg); wg.connect(into);
   const bus = { ctx, out: into, wet, timers: [], srcs: [], stopped: false };
-  ((kind || bgmKind()) === "eerie" ? scoreEerie : scoreLight)(bus);
+  SCORES[k](bus);
   BGM.out = out;
   BGM.stop = () => {
     const t = ctx.currentTime; bus.stopped = true; bus.timers.forEach(clearTimeout);
@@ -1083,6 +1086,7 @@ function tone(bus, f, o = {}){
   osc.type = o.type || "sine"; osc.frequency.value = f; if (o.detune) osc.detune.value = o.detune;
   env.gain.setValueAtTime(0.0001, t); env.gain.linearRampToValueAtTime(o.g || 0.05, t + a); env.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
   let head = osc;
+  if (o.vib){ const v = ctx.createOscillator(), vg = ctx.createGain(); v.frequency.value = 5; vg.gain.value = o.vib; v.connect(vg); vg.connect(osc.frequency); v.start(t); v.stop(t + a + d + 0.1); }
   if (o.lp){ const f2 = ctx.createBiquadFilter(); f2.type = "lowpass"; f2.frequency.value = o.lp; osc.connect(f2); head = f2; }
   head.connect(env); env.connect(bus.out); env.connect(bus.wet);
   osc.start(t); osc.stop(t + a + d + 0.1);
@@ -1092,7 +1096,7 @@ function drone(bus, freqs, o = {}){
   const {ctx} = bus, g = o.g || 0.05, lp = ctx.createBiquadFilter(), vg = ctx.createGain();
   lp.type = "lowpass"; lp.frequency.value = o.cut || 700; vg.gain.value = g;
   lp.connect(vg); vg.connect(bus.out); vg.connect(bus.wet);
-  const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = o.wob || 0.1; lg.gain.value = g * 0.4;
+  const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = o.wob || 0.1; lg.gain.value = g * (o.depth || 0.4);
   lfo.connect(lg); lg.connect(vg.gain); lfo.start(); bus.srcs.push(lfo);
   for (const f of freqs) for (const dt of [-5, 5]){
     const osc = ctx.createOscillator(); osc.type = o.type || "triangle"; osc.frequency.value = f; osc.detune.value = dt;
@@ -1131,6 +1135,65 @@ function scoreEerie(bus){
   repeat(bus, () => tone(bus, hz(notes[Math.floor(Math.random() * notes.length)]), {a: 0.3, d: 4.5, g: 0.085, detune: -18}),
     2000, () => 2500 + Math.random() * 3500);
 }
+
+// a held chord that moves to the next chord every few seconds
+function chordPad(bus, chords, every, o = {}){
+  const {ctx} = bus, g = o.g || 0.05, lp = ctx.createBiquadFilter(), vg = ctx.createGain();
+  lp.type = "lowpass"; lp.frequency.value = o.cut || 1500; vg.gain.value = g;
+  lp.connect(vg); vg.connect(bus.out); vg.connect(bus.wet);
+  const oscs = chords[0].map(m => [-5, 5].map(dt => {
+    const x = ctx.createOscillator(); x.type = o.type || "triangle"; x.frequency.value = hz(m); x.detune.value = dt;
+    x.connect(lp); x.start(); bus.srcs.push(x); return x; }));
+  let i = 0;
+  repeat(bus, () => { i = (i + 1) % chords.length; const t = ctx.currentTime;
+    chords[i].forEach((m, n) => oscs[n].forEach(x => x.frequency.setTargetAtTime(hz(m), t, 0.35))); }, every, () => every);
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+// Funny: a skipping plucked tune over a bouncing bass, G major.
+function scoreFunny(bus){
+  drone(bus, [hz(67), hz(71)], {type: "sine", g: 0.035, cut: 2000, wob: 0.2});
+  const bass = [55, 62, 59, 62]; let b = 0;
+  repeat(bus, () => tone(bus, hz(bass[b++ % 4]), {type: "triangle", a: 0.005, d: 0.35, g: 0.09}), 200, () => 500);
+  const sc = [67, 69, 71, 74, 76, 79]; let k = 2;
+  repeat(bus, () => {
+    k = Math.max(0, Math.min(sc.length - 1, k + pick([-1, 1, 1, -1, 2, -2])));
+    tone(bus, hz(sc[k]), {type: "triangle", a: 0.005, d: 0.25, g: 0.07});
+    if (Math.random() < 0.3) tone(bus, hz(sc[Math.min(sc.length - 1, k + 1)]), {type: "triangle", a: 0.005, d: 0.25, g: 0.06, at: 0.25});
+  }, 450, () => pick([250, 500, 500, 750, 1000]));
+}
+// Moving: warm chords (Em, C, G, D) under a slow flute-like line.
+function scoreMoving(bus){
+  chordPad(bus, [[64, 67, 71], [64, 67, 72], [62, 67, 71], [62, 66, 69]], 6000, {type: "triangle", g: 0.07, cut: 1600});
+  const sc = [76, 79, 81, 83, 86, 88];
+  repeat(bus, () => tone(bus, hz(pick(sc)), {a: 0.25, d: 2.2, g: 0.05, vib: 3}), 1500, () => 1800 + Math.random() * 1400);
+}
+// Sad: slow, darker chords (Am, F, Dm, E) and falling piano-like notes.
+function scoreSad(bus){
+  chordPad(bus, [[57, 60, 64], [57, 60, 65], [57, 62, 65], [56, 59, 64]], 7000, {type: "triangle", g: 0.075, cut: 1100});
+  const fall = [76, 74, 72, 71, 69, 67, 64]; let i = 0;
+  repeat(bus, () => { const f = hz(fall[i++ % fall.length]);
+    tone(bus, f, {a: 0.005, d: 4, g: 0.045}); tone(bus, f, {type: "triangle", a: 0.005, d: 1.5, g: 0.015}); },
+    2000, () => 2800 + Math.random() * 1700);
+}
+// Thoughtful: an open, still pad and a slow music-box pattern that pauses and returns.
+function scoreThoughtful(bus){
+  drone(bus, [hz(60), hz(67)], {type: "triangle", g: 0.07, cut: 1800, wob: 0.06});
+  drone(bus, [hz(74)], {type: "sine", g: 0.025, cut: 2500, wob: 0.09});
+  const arp = [72, 76, 79, 83, 86, 83, 79, 76]; let i = 0;
+  repeat(bus, () => { const m = arp[i++ % arp.length];
+    tone(bus, hz(m), {a: 0.005, d: 2, g: 0.045}); tone(bus, hz(m) * 2, {a: 0.005, d: 0.6, g: 0.008}); },
+    800, () => (i % arp.length === 0 ? 2800 : 700));
+}
+// Tense: a trembling string-like chord with a clashing note, and a quiet heartbeat.
+function scoreTense(bus){
+  drone(bus, [hz(62), hz(69)], {type: "triangle", g: 0.06, cut: 1400, wob: 0.08});
+  drone(bus, [hz(62), hz(65)], {type: "sawtooth", g: 0.022, cut: 1500, wob: 6, depth: 0.9});   // tremolo
+  drone(bus, [hz(75)], {type: "sine", g: 0.018, cut: 3000, wob: 0.15});                          // the clash
+  repeat(bus, () => { tone(bus, hz(55), {type: "triangle", a: 0.005, d: 0.25, g: 0.12, lp: 600});
+    tone(bus, hz(55), {type: "triangle", a: 0.005, d: 0.2, g: 0.08, lp: 600, at: 0.22}); }, 600, () => 1500);
+}
+const SCORES = {light: scoreLight, eerie: scoreEerie, funny: scoreFunny, moving: scoreMoving, sad: scoreSad, thoughtful: scoreThoughtful, tense: scoreTense};
+const TRIM = {light: 1, eerie: 1, funny: 2.0, moving: 1.23, sad: 1.36, thoughtful: 1.46, tense: 1.5};
 
 // ---------- sheets ----------
 function openSheet(id){ $("#scrim").hidden = false; $(id).hidden = false; }

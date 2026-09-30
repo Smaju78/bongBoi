@@ -119,8 +119,6 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .hint{flex:1;min-width:0;border:0;background:transparent;padding:0;text-align:left;color:var(--muted);font-size:13px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #surpriseBtn{flex:none;font-size:16px;padding:4px 9px}
 .count{margin:-6px 0 -8px;font-size:13px;color:var(--muted)}
-.vol h2.letter{font-family:var(--story);font-weight:400;font-size:20px;color:var(--accent);margin:4px 0 6px;padding-left:4px;
-  scroll-margin-top:calc(var(--hh,56px) + var(--ch,96px) + 12px)}
 .tags{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
 .tag{font-size:11px;line-height:1.3;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
 .tag.mood{background:var(--mark-soft);color:var(--mark)}
@@ -129,14 +127,10 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background
 .arow .av{grid-row:span 2;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-family:var(--story);font-size:19px}
 .arow .t{font-size:19px}
 .arow .by{grid-column:2/-1}
-.az{position:fixed;right:max(0px, calc((100vw - 560px) / 2 - 30px));top:calc(var(--hh,56px) + var(--ch,96px) + 8px);bottom:12px;z-index:6;
-  display:flex;flex-direction:column;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
-.az span{display:grid;place-items:center;width:18px;height:min(20px, calc((100vh - var(--hh,56px) - var(--ch,96px) - 40px) / var(--n,20)));
-  font-size:min(12px, calc((100vh - var(--hh,56px) - var(--ch,96px) - 40px) / var(--n,20) * .8));color:var(--accent);font-weight:600;cursor:pointer}
-.az.off{opacity:0;pointer-events:none}
-.az{transition:opacity .2s}
-.azb{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:41;width:76px;height:76px;border-radius:18px;
-  background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:var(--story);font-size:38px;pointer-events:none;opacity:.9}
+.spin{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:45;width:54px;height:54px;border-radius:16px;
+  background:var(--surface);box-shadow:0 6px 24px rgba(0,0,0,.18);display:grid;place-items:center}
+.spin i{width:26px;height:26px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 /* tag picker */
 .tg h3{margin:6px 0 8px;font-size:13px;font-weight:600;color:var(--muted)}
 .tchips{display:flex;flex-wrap:wrap;gap:8px}
@@ -283,7 +277,6 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
       <div id="vols"><p class="empty">Loading stories…</p></div>
       <p class="src">Texts from Bengali Wikisource (public domain), split into short posts.</p>
     </div>
-    <nav class="az" id="az" hidden aria-label="Jump to letter"></nav>
   </section>
 
   <!-- READER -->
@@ -346,7 +339,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
   </div>
   <div class="sfoot"><button class="btn ghost" id="tagClear" type="button">Clear all</button><button class="btn" id="tagShow" type="button">Show</button></div>
 </section>
-<div class="azb" id="azBubble" hidden></div>
+<div class="spin" id="spin" hidden role="status" aria-label="Opening story"><i></i></div>
 
 <section class="sheet set" id="setSheet" hidden aria-label="Settings">
   <div class="inner">
@@ -499,7 +492,6 @@ const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
 function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
 const sortKey = t => (t || "").replace(/^[^ঀ-৿A-Za-z]+/, "");
 const byTitle = (a, b) => sortKey(a.title).localeCompare(sortKey(b.title), "bn");
-function letterOf(t){ const c = sortKey(t)[0] || ""; return /[অ-হড়-য়]/.test(c) ? c : "#"; }
 const collName = (c, author) => !c ? "" :
   c.replace(/,\s*[০-৯]{4}\s*\)/, ")").replace(/\s*\([০-৯]{4}\)/, "").replace(" (" + author + ")", "").trim();
 
@@ -548,19 +540,10 @@ function authorRow(A, i, n){
   b.onclick = () => { location.hash = "author-" + i; };
   return b;
 }
-// Rows grouped under letter headers. Returns the letters used, for the side index.
-function lettered(items, nameOf, make){
-  const vols = $("#vols"), letters = []; let box = null, cur = null;
-  for (const it of items){
-    const L = letterOf(nameOf(it));
-    if (L !== cur){
-      cur = L; const sec = el("div", "vol"), h = el("h2", "letter", L); box = el("div", "list");
-      if (!letters.includes(L)){ letters.push(L); h.id = "L-" + L; }
-      sec.append(h, box); vols.append(sec);
-    }
-    box.append(make(it));
-  }
-  return letters;
+// One plain list, already sorted A–Z.
+function flatList(items, make){
+  if (!items.length) return;
+  const box = el("div", "list"); items.forEach(it => box.append(make(it))); $("#vols").append(box);
 }
 function emptyNote(msg){
   const p = el("div", "empty"); p.append(el("span", "", msg + " "));
@@ -618,13 +601,12 @@ function renderLibrary(){
   renderFilters();
   const vols = $("#vols"); vols.textContent = "";
   const tagsNote = SEL.size ? " with these tags" : "";
-  let letters = [], shown = 0, count = "";
+  let count = "";
   const flat = rows => { const box = el("div", "list"); rows.forEach(r => box.append(r)); vols.append(box); };
   if (A){
     const all = A.stories.filter(s => fits(s));
     let list = all;
     if (q) list = all.map(s => [s, textScore(s.title, q)]).filter(x => x[1] !== null).sort((a, b) => a[1] - b[1]).map(x => x[0]);
-    shown = list.length;
     $("#authorName").textContent = A.name;
     $("#authorCount").textContent = (SEL.size ? all.length + " of " : "") + plural(A.stories.length, "story", "stories") + (SEL.size ? " match" : "");
     document.title = A.name + " · bongBoi";
@@ -633,13 +615,12 @@ function renderLibrary(){
       else vols.append(emptyNote("No story by " + A.name + " matches “" + q + "”" + tagsNote + "."));
     } else {
       if (!list.length) vols.append(emptyNote("No stories by " + A.name + " with these tags."));
-      letters = lettered(list, s => s.title, s => storyRow(s, false));
+      flatList(list, s => storyRow(s, false));
     }
   } else if (TAB === "authors"){
     let rows = [];
     AUTHORS.forEach((A, i) => { const n = SEL.size ? A.stories.filter(s => fits(s)).length : A.stories.length; if (n) rows.push({A, i, n}); });
     if (q) rows = rows.map(x => (x.sc = textScore(authorKey(x.A.name), q), x)).filter(x => x.sc !== null).sort((a, b) => a.sc - b.sc);
-    shown = rows.length;
     const stories = plural(rows.reduce((t, x) => t + x.n, 0), "story", "stories");
     if (q){
       if (rows.length){ count = plural(rows.length, "author", "authors") + " found · " + stories + tagsNote; flat(rows.map(x => authorRow(x.A, x.i, x.n))); }
@@ -647,25 +628,23 @@ function renderLibrary(){
     } else {
       count = plural(rows.length, "author", "authors") + " · " + stories + (SEL.size ? " match" : "");
       if (!rows.length) vols.append(emptyNote("No stories match these tags."));
-      letters = lettered(rows, x => x.A.name, x => authorRow(x.A, x.i, x.n));
+      flatList(rows, x => authorRow(x.A, x.i, x.n));
     }
   } else {
     if (q){
       const hits = CATALOG.filter(s => fits(s) && matches(s, q)).sort((a, b) => a._score - b._score);
-      shown = hits.length;
       if (hits.length){ count = plural(hits.length, "story", "stories") + " found" + tagsNote; flat(hits.slice(0, 200).map(s => storyRow(s, true))); }
       else vols.append(emptyNote("No story matches “" + q + "”" + tagsNote + "."));
     } else {
-      const list = STORIES_AZ.filter(s => fits(s)); shown = list.length;
+      const list = STORIES_AZ.filter(s => fits(s));
       count = plural(list.length, "story", "stories") + (SEL.size ? " match" : ", A–Z");
       if (!list.length) vols.append(emptyNote("No stories match these tags."));
-      letters = lettered(list, s => s.title, s => storyRow(s, true));
+      flatList(list, s => storyRow(s, true));
     }
   }
   $("#countLine").textContent = count; $("#countLine").hidden = !count;
-  buildAZ(shown > 20 ? letters : []);
   if (!A && !q){ renderShelf(""); renderToday(); }
-  measure(); azShow();
+  measure();
 }
 function renderFilters(){
   const n = SEL.size, b = $("#tagBtn");
@@ -686,10 +665,6 @@ function measure(){
   r.setProperty("--ch", $("#controls").offsetHeight + "px");
 }
 addEventListener("resize", measure);
-// The A–Z strip appears once the list has reached the top of the screen.
-function azShow(){ if ($("#libView").hidden || $("#az").hidden) return;
-  $("#az").classList.toggle("off", $("#ctlAnchor").getBoundingClientRect().top > $("#libHead").offsetHeight + 1); }
-addEventListener("scroll", azShow, {passive:true});
 // After a tab switch or a new filter, bring the list's top into view if you'd scrolled past it.
 function keepControlsTop(){
   const y = $("#ctlAnchor").getBoundingClientRect().top + scrollY - $("#libHead").offsetHeight;
@@ -727,26 +702,6 @@ function renderTagSheet(){
 $("#tagBtn").onclick = openTags;
 $("#tagClear").onclick = () => { DRAFT.clear(); renderTagSheet(); };
 $("#tagShow").onclick = () => { SEL = new Set(DRAFT); closeSheets(); renderLibrary(); keepControlsTop(); };
-
-// ---------- A–Z side index: tap or slide a finger along it ----------
-function buildAZ(letters){
-  const az = $("#az"); az.textContent = ""; az.hidden = letters.length < 3;
-  az.style.setProperty("--n", letters.length);
-  for (const L of letters){ const s = el("span", "", L); s.dataset.l = L; az.append(s); }
-}
-let azOn = false, azLast = "";
-function azJump(e){
-  const r = $("#az").getBoundingClientRect();
-  const t = document.elementFromPoint(r.left + r.width / 2, e.clientY)?.closest?.("[data-l]");
-  if (!t || t.dataset.l === azLast) return; azLast = t.dataset.l;
-  document.getElementById("L-" + azLast)?.scrollIntoView({block: "start"});
-  const bb = $("#azBubble"); bb.textContent = azLast; bb.hidden = false;
-  clearTimeout(azJump.t); azJump.t = setTimeout(() => { bb.hidden = true; }, 700);
-}
-$("#az").addEventListener("pointerdown", e => { azOn = true; azLast = ""; $("#az").setPointerCapture?.(e.pointerId); azJump(e); e.preventDefault(); });
-$("#az").addEventListener("pointermove", e => { if (azOn) azJump(e); });
-$("#az").addEventListener("pointerup", () => { azOn = false; });
-$("#az").addEventListener("pointercancel", () => { azOn = false; });
 
 // ---------- continue-reading shelf ----------
 function getShelf(){
@@ -789,8 +744,10 @@ async function openStory(id){
   if (location.hash !== "#" + id){ location.hash = id; return; } // hashchange calls back in
   const meta = CATALOG.find(s => s.id === id); if (!meta){ location.hash = ""; return; }
   let data;
+  const spin = setTimeout(() => { $("#spin").hidden = false; }, 150);   // only if it takes a moment
   try { const r = await fetch("stories/" + meta.file); if (!r.ok) throw 0; data = await r.json(); }
-  catch(e){ toast("Couldn't open this story. Try again."); location.hash = ""; return; }
+  catch(e){ clearTimeout(spin); $("#spin").hidden = true; toast("Couldn't open this story. Try again."); location.hash = ""; return; }
+  clearTimeout(spin); $("#spin").hidden = true;
   STORY = data; ITEMS = data.items; PG.built = false;
   READ = []; ITEMS.forEach(it => { if (it.t){ it.n = READ.length + 1; it.dialogue = /“/.test(it.t); READ.push(it); } });
   TOTAL = READ.length; rendered = 0; focusN = 0; started = false;
@@ -810,7 +767,7 @@ function showLibrary(){
   closeSheets(); $("#back").hidden = true;
   STORY = null; $("#readView").hidden = true; $("#libView").hidden = false; document.title = "bongBoi";
   $("#pager").hidden = true; document.body.classList.remove("pagemode");
-  renderLibrary(); scrollTo(0, RESTORE ? SCROLL[location.hash.slice(1)] || 0 : 0); RESTORE = false; azShow();
+  renderLibrary(); scrollTo(0, RESTORE ? SCROLL[location.hash.slice(1)] || 0 : 0); RESTORE = false;
 }
 $("#backBtn").onclick = () => {
   const i = STORY ? AUTHORS.findIndex(A => A.name === STORY.author) : -1;

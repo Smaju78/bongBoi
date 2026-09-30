@@ -353,6 +353,9 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
     <label for="focusMode">Focus
       <select id="focusMode"><option value="blur">Blur and fade</option><option value="dim">Fade only</option><option value="off">Off</option></select>
     </label>
+    <label for="music">Background music (read aloud)
+      <select id="music"><option value="soft">Soft</option><option value="medium">Medium</option><option value="off">Off</option></select>
+    </label>
     <label for="rate">Read-aloud speed
       <select id="rate"><option value="0.8">Slow</option><option value="1">Normal</option><option value="1.2">Fast</option></select>
     </label>
@@ -379,18 +382,19 @@ const kLast = id => "bb.last." + id, kEar = id => "bb.ear." + id, kDone = id => 
 const num = k => parseInt(store.get(k,"0"),10) || 0;
 
 // ---------- settings ----------
-const S = { rate: store.get("sr.rate","1"), mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","Bengali"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur") };
+const S = { rate: store.get("sr.rate","1"), mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","Bengali"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur"), music: store.get("sr.music","soft") };
 function applySettings(){
   const r = document.documentElement;
   r.style.setProperty("--fs", S.size);
   if (S.theme) r.setAttribute("data-theme", S.theme); else r.removeAttribute("data-theme");
   document.body.classList.toggle("f-blur", S.focusMode === "blur");
   document.body.classList.toggle("f-dim", S.focusMode === "dim");
-  for (const k of ["rate","mode","lang","size","theme","focusMode"]) $("#"+k).value = S[k];
+  for (const k of ["rate","mode","lang","size","theme","focusMode","music"]) $("#"+k).value = S[k];
 }
-for (const k of ["rate","mode","lang","size","theme","focusMode"]) $("#"+k).addEventListener("change", e => {
+for (const k of ["rate","mode","lang","size","theme","focusMode","music"]) $("#"+k).addEventListener("change", e => {
   const here = STORY ? currentPost() : 1;
   S[k] = e.target.value; store.set(k === "focusMode" ? "sr.focus" : "sr."+k, S[k]); applySettings();
+  if (k === "music"){ if (TTS.on){ if (S.music === "off") bgmStop(); else if (BGM.out) bgmLevel(); else bgmStart(); } return; }
   if (STORY && (k === "mode" || k === "size")) applyMode(here); else updateFocus();
 });
 
@@ -1009,6 +1013,7 @@ function bnVoice(){
 if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { TTS.voice = bnVoice(); };
 function speakStop(){
   TTS.on = false; if ("speechSynthesis" in window) speechSynthesis.cancel();
+  bgmStop();
   document.querySelectorAll(".speaking").forEach(e => e.classList.remove("speaking"));
   $("#speakBtn").setAttribute("aria-pressed", "false");
 }
@@ -1030,9 +1035,102 @@ $("#speakBtn").onclick = () => {
   TTS.voice = bnVoice();
   if (!TTS.voice) toast("No Bengali voice found. It may sound odd; install Google's Bengali voice in phone settings.");
   TTS.on = true; $("#speakBtn").setAttribute("aria-pressed", "true");
+  bgmStart();
   speakFrom(Math.max(1, currentPost()));
 };
 addEventListener("hashchange", speakStop);
+
+// ---------- background music for read aloud ----------
+// Made live by the phone's sound engine (no files). The story's tags pick the mood.
+// Trial: Ghost or Eerie stories get the eerie score, everything else the light one.
+const BGM = { ctx: null, out: null, stop: null, dest: null };
+const LEVEL = { soft: 0.343, medium: 0.49 };     // volume after the leveller; Soft is 30% below Medium
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);            // note number → pitch
+function bgmKind(){
+  const meta = STORY && CATALOG.find(s => s.id === STORY.id);
+  return meta && (meta.g.includes("ghost") || meta.mood === "eerie") ? "eerie" : "light";
+}
+function bgmLevel(){ const o = BGM.out; if (!o) return; const t = BGM.ctx.currentTime;
+  o.gain.cancelScheduledValues(t); o.gain.setValueAtTime(o.gain.value, t); o.gain.linearRampToValueAtTime(LEVEL[S.music] || 0, t + 1); }
+function bgmStart(kind){
+  if (S.music === "off" || BGM.stop) return;
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+  const ctx = BGM.ctx || (BGM.ctx = new AC()); ctx.resume?.();
+  const comp = ctx.createDynamicsCompressor();          // keeps the level even, no sudden peaks
+  comp.threshold.value = -24; comp.ratio.value = 4; comp.attack.value = 0.05; comp.release.value = 0.4;
+  const out = ctx.createGain(); out.gain.value = 0;     // fades and the Soft/Medium volume live here, after the leveller
+  comp.connect(out); out.connect(BGM.dest || ctx.destination);
+  const into = ctx.createGain(); into.gain.value = 0.7; into.connect(comp);
+  out.gain.linearRampToValueAtTime(LEVEL[S.music] || 0.343, ctx.currentTime + 4);   // slow fade in
+  // a soft room echo, made from decaying noise
+  const len = ctx.sampleRate * 3.5, buf = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++){ const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5); }
+  const wet = ctx.createConvolver(); wet.buffer = buf; const wg = ctx.createGain(); wg.gain.value = 0.6; wet.connect(wg); wg.connect(into);
+  const bus = { ctx, out: into, wet, timers: [], srcs: [], stopped: false };
+  ((kind || bgmKind()) === "eerie" ? scoreEerie : scoreLight)(bus);
+  BGM.out = out;
+  BGM.stop = () => {
+    const t = ctx.currentTime; bus.stopped = true; bus.timers.forEach(clearTimeout);
+    out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + 1.5);
+    setTimeout(() => { bus.srcs.forEach(x => { try { x.stop(); } catch(e){} }); out.disconnect(); comp.disconnect(); into.disconnect(); }, 1800);
+  };
+}
+function bgmStop(){ if (BGM.stop){ BGM.stop(); BGM.stop = null; BGM.out = null; } }
+// one soft note that fades away
+function tone(bus, f, o = {}){
+  const {ctx} = bus, t = ctx.currentTime + (o.at || 0), a = o.a || 0.02, d = o.d || 3;
+  const osc = ctx.createOscillator(), env = ctx.createGain();
+  osc.type = o.type || "sine"; osc.frequency.value = f; if (o.detune) osc.detune.value = o.detune;
+  env.gain.setValueAtTime(0.0001, t); env.gain.linearRampToValueAtTime(o.g || 0.05, t + a); env.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+  let head = osc;
+  if (o.lp){ const f2 = ctx.createBiquadFilter(); f2.type = "lowpass"; f2.frequency.value = o.lp; osc.connect(f2); head = f2; }
+  head.connect(env); env.connect(bus.out); env.connect(bus.wet);
+  osc.start(t); osc.stop(t + a + d + 0.1);
+}
+// a held chord that slowly breathes
+function drone(bus, freqs, o = {}){
+  const {ctx} = bus, g = o.g || 0.05, lp = ctx.createBiquadFilter(), vg = ctx.createGain();
+  lp.type = "lowpass"; lp.frequency.value = o.cut || 700; vg.gain.value = g;
+  lp.connect(vg); vg.connect(bus.out); vg.connect(bus.wet);
+  const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = o.wob || 0.1; lg.gain.value = g * 0.4;
+  lfo.connect(lg); lg.connect(vg.gain); lfo.start(); bus.srcs.push(lfo);
+  for (const f of freqs) for (const dt of [-5, 5]){
+    const osc = ctx.createOscillator(); osc.type = o.type || "triangle"; osc.frequency.value = f; osc.detune.value = dt;
+    osc.connect(lp); osc.start(); bus.srcs.push(osc);
+  }
+}
+function repeat(bus, fn, first, every){          // run fn now-ish, then again after every() ms
+  const go = () => { if (bus.stopped) return; fn(); bus.timers.push(setTimeout(go, every())); };
+  bus.timers.push(setTimeout(go, first));
+}
+// Light: a warm pad (D, F#, A) that phone speakers can play, a tanpura cycle (Pa Sa Sa Sa), and bells from the D major pentatonic.
+function scoreLight(bus){
+  drone(bus, [hz(62), hz(66), hz(69)], {type: "triangle", g: 0.09, cut: 1800, wob: 0.07});
+  drone(bus, [hz(74)], {type: "sine", g: 0.035, cut: 2500, wob: 0.11});
+  const cycle = [hz(57), hz(62), hz(62), hz(50)]; let i = 0;
+  repeat(bus, () => tone(bus, cycle[i++ % 4], {type: "sawtooth", a: 0.01, d: 2.4, g: 0.05, lp: 2200}), 300, () => 1200);
+  const scale = [74, 76, 78, 81, 83, 86, 88];
+  repeat(bus, () => { const m = scale[Math.floor(Math.random() * scale.length)];
+    tone(bus, hz(m), {a: 0.005, d: 3, g: 0.07}); tone(bus, hz(m) * 2.01, {a: 0.005, d: 1, g: 0.012}); },
+    1500, () => 1400 + Math.random() * 2200);
+}
+// Eerie: a hollow pad with a clashing note, a slow wavering high tone, wind, and out-of-tune chimes.
+function scoreEerie(bus){
+  const {ctx} = bus;
+  drone(bus, [hz(50), hz(57)], {type: "triangle", g: 0.13, cut: 1500, wob: 0.05});
+  drone(bus, [hz(56), hz(68)], {type: "sine", g: 0.06, cut: 1800, wob: 0.13});          // the tritone that makes it uneasy
+  drone(bus, [hz(81)], {type: "sine", g: 0.035, cut: 3000, wob: 0.21});
+  const len = ctx.sampleRate * 4, nb = ctx.createBuffer(1, len, ctx.sampleRate), d = nb.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const noise = ctx.createBufferSource(); noise.buffer = nb; noise.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 800; bp.Q.value = 3;
+  const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.07; lg.gain.value = 450; lfo.connect(lg); lg.connect(bp.frequency);
+  const ng = ctx.createGain(); ng.gain.value = 0.05; noise.connect(bp); bp.connect(ng); ng.connect(bus.out); ng.connect(bus.wet);
+  noise.start(); lfo.start(); bus.srcs.push(noise, lfo);
+  const notes = [74, 68, 77, 73, 70, 80];
+  repeat(bus, () => tone(bus, hz(notes[Math.floor(Math.random() * notes.length)]), {a: 0.3, d: 4.5, g: 0.085, detune: -18}),
+    2000, () => 2500 + Math.random() * 3500);
+}
 
 // ---------- sheets ----------
 function openSheet(id){ $("#scrim").hidden = false; $(id).hidden = false; }

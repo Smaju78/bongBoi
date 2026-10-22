@@ -2,8 +2,8 @@
 // The page and story list are fetched fresh when online (so updates show up),
 // and fall back to the saved copy when offline. Stories, icons and fonts are
 // saved the first time they load and served from the phone after that.
-const CACHE = "bongboi-v4";
-const CORE = ["./", "index.html", "stories/catalog.json", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
+const CACHE = "bongboi-v5";
+const CORE = ["./", "index.html", "stories/catalog.json", "stories/en/catalog.json", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));

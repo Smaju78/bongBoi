@@ -43,6 +43,7 @@
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{-webkit-text-size-adjust:100%}
 body{margin:0}
+html[lang="en"]{--story:Georgia,"Times New Roman",serif}
 img{max-width:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.5;padding-inline:16px}
 .wrap{max-width:560px;margin:0 auto}
@@ -247,9 +248,10 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
   <!-- LIBRARY -->
   <section id="libView">
     <header class="top" id="libHead">
-      <div class="head-main" id="brandBox"><p class="brand">bongBoi<small>Bengali stories</small></p></div>
+      <div class="head-main" id="brandBox"><p class="brand">bongBoi<small id="brandSub">Bengali stories</small></p></div>
       <button class="iconbtn" id="authorBack" type="button" hidden>‹ Back</button>
       <div class="head-main" id="authorBox" hidden><h1 id="authorName"></h1><p id="authorCount"></p></div>
+      <button class="iconbtn" id="libBtn" type="button">English</button>
       <button class="iconbtn" data-open-settings type="button">Settings</button>
     </header>
     <div id="library">
@@ -275,7 +277,7 @@ a.btn{text-decoration:none;display:inline-block;font-size:14px}
       </div>
       <p class="count" id="countLine" hidden></p>
       <div id="vols"><p class="empty">Loading stories…</p></div>
-      <p class="src">Texts from Bengali Wikisource (public domain), split into short posts.</p>
+      <p class="src" id="srcNote">Texts from Bengali Wikisource (public domain), split into short posts.</p>
     </div>
   </section>
 
@@ -382,7 +384,7 @@ const kLast = id => "bb.last." + id, kEar = id => "bb.ear." + id, kDone = id => 
 const num = k => parseInt(store.get(k,"0"),10) || 0;
 
 // ---------- settings ----------
-const S = { rate: store.get("sr.rate","1"), mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","Bengali"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur"), music: store.get("sr.music","soft") };
+const S = { rate: store.get("sr.rate","1"), mode: store.get("sr.mode","feed"), lang: store.get("sr.lang","Bengali"), size: store.get("sr.size","19px"), theme: store.get("sr.theme",""), focusMode: store.get("sr.focus","blur"), music: store.get("sr.music","soft"), lib: store.get("sr.lib","bn") === "en" ? "en" : "bn" };
 function applySettings(){
   const r = document.documentElement;
   r.style.setProperty("--fs", S.size);
@@ -448,11 +450,14 @@ function matches(s, q){
 }
 
 // ---------- library ----------
-let CATALOG = [], TAGS = {};
+let CATALOG = [], ALL = [], TAGS = {};    // CATALOG: the library you're in (bn or en); ALL: both
 async function loadCatalog(){
   try {
-    const r = await fetch("stories/catalog.json"); if (!r.ok) throw new Error(r.status);
-    CATALOG = (await r.json()).stories;
+    const bn = await fetch("stories/catalog.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const en = await fetch("stories/en/catalog.json").then(r => r.ok ? r.json() : { stories: [] }).catch(() => ({ stories: [] }));
+    for (const s of bn.stories){ s.lib = "bn"; s.dir = "stories/"; }
+    for (const s of en.stories){ s.lib = "en"; s.dir = "stories/en/"; }
+    ALL = [...bn.stories, ...en.stories];
   } catch(e){
     $("#vols").innerHTML = ""; const p = document.createElement("p"); p.className = "empty";
     p.textContent = "Couldn't load the story list. Check your connection and reload."; $("#vols").append(p); return false;
@@ -460,10 +465,13 @@ async function loadCatalog(){
   try {                     // genres, mood and a one-line blurb per story (optional file)
     const t = await fetch("stories/tags.json"); if (t.ok) TAGS = await t.json();
   } catch(e){}
-  CATALOG = CATALOG.filter(s => !(TAGS[s.id] && TAGS[s.id].dup));
-  for (const s of CATALOG){ const t = TAGS[s.id]; s.g = t ? t.g : []; s.mood = t ? t.m : ""; s.blurb = t ? t.b : ""; }
+  ALL = ALL.filter(s => !(TAGS[s.id] && TAGS[s.id].dup));
+  for (const s of ALL){ const t = TAGS[s.id]; s.g = t ? t.g : []; s.mood = t ? t.m : ""; s.blurb = t ? t.b : ""; }
+  CATALOG = ALL.filter(s => s.lib === S.lib);
   return true;
 }
+// Authors sort by surname in English, by the name as written in Bengali.
+const nameKey = n => S.lib === "en" ? n.split(" ").pop() : sortKey(n);
 const MIN = s => Math.max(1, Math.round(s.posts * 8 / 60));            // rough reading minutes (~8 s a post)
 
 // ---------- tags: three groups. Any tag within a group, every group you use. ----------
@@ -507,7 +515,7 @@ function buildAuthors(){
     const gc = {}; for (const s of stories) for (const g of s.g) gc[g] = (gc[g] || 0) + 1;
     const top = Object.entries(gc).filter(x => x[1] >= 2 && GENRE[x[0]]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => GENRE[x[0]]);
     return {name, stories: stories.sort(byTitle), top};
-  }).sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name), "bn"));
+  }).sort((a, b) => nameKey(a.name).localeCompare(nameKey(b.name), "bn"));
   STORIES_AZ = [...CATALOG].sort(byTitle);
 }
 function nextStory(){
@@ -537,7 +545,7 @@ function storyRow(s, showAuthor){
 function authorRow(A, i, n){
   const b = el("button", "row arow"); b.type = "button";
   const total = A.stories.length, read = A.stories.filter(isDone).length;
-  b.append(el("span", "av", sortKey(A.name)[0] || "?"), el("span", "t", A.name),
+  b.append(el("span", "av", nameKey(A.name)[0] || "?"), el("span", "t", A.name),
     el("span", "m", SEL.size ? n + " of " + total : plural(total, "story", "stories")));
   const sub = [...A.top, read ? read + " read" : ""].filter(Boolean).join(" · ");
   if (sub) b.append(el("span", "by", sub));
@@ -599,7 +607,8 @@ function renderLibrary(){
   const q = $("#search").value.trim(), A = AUTHOR !== null ? AUTHORS[AUTHOR] : null;
   $("#brandBox").hidden = !!A; $("#authorBack").hidden = !A; $("#authorBox").hidden = !A;
   $("#homeTop").hidden = !!A || !!q; $("#tabs").hidden = !!A;
-  $("#search").placeholder = A ? "Search this author's stories" : TAB === "authors" ? "Search authors: sarat, tagore, sukumar" : "Search stories: kabuliwala, mahesh";
+  const EN = S.lib === "en";
+  $("#search").placeholder = A ? "Search this author's stories" : TAB === "authors" ? (EN ? "Search authors: poe, chekhov, wilde" : "Search authors: sarat, tagore, sukumar") : (EN ? "Search stories: gift of the magi, tell-tale heart" : "Search stories: kabuliwala, mahesh");
   $("#search").setAttribute("aria-label", $("#search").placeholder);
   for (const t of document.querySelectorAll("#tabs [data-tab]")) t.setAttribute("aria-selected", t.dataset.tab === TAB ? "true" : "false");
   renderFilters();
@@ -746,10 +755,11 @@ const BATCH = 12, feed = $("#feed");
 
 async function openStory(id){
   if (location.hash !== "#" + id){ location.hash = id; return; } // hashchange calls back in
-  const meta = CATALOG.find(s => s.id === id); if (!meta){ location.hash = ""; return; }
+  const meta = ALL.find(s => s.id === id); if (!meta){ location.hash = ""; return; }
+  if (meta.lib !== S.lib) setLib(meta.lib);
   let data;
   const spin = setTimeout(() => { $("#spin").hidden = false; }, 150);   // only if it takes a moment
-  try { const r = await fetch("stories/" + meta.file); if (!r.ok) throw 0; data = await r.json(); }
+  try { const r = await fetch(meta.dir + meta.file); if (!r.ok) throw 0; data = await r.json(); }
   catch(e){ clearTimeout(spin); $("#spin").hidden = true; toast("Couldn't open this story. Try again."); location.hash = ""; return; }
   clearTimeout(spin); $("#spin").hidden = true;
   STORY = data; ITEMS = data.items; PG.built = false;
@@ -781,15 +791,16 @@ $("#backBtn").onclick = () => {
 let CAME_FROM_AUTHOR = false, RESTORE = false; const SCROLL = {};
 addEventListener("hashchange", e => {
   const old = (e.oldURL || "").split("#")[1] || "", now = location.hash.slice(1);
-  if (!/^ws-/.test(old)) SCROLL[old] = scrollY;
-  if (/^ws-/.test(now) && !/^ws-/.test(old)) CAME_FROM_AUTHOR = /^author-\d+$/.test(old);
-  RESTORE = /^ws-/.test(old) || now === "";
-  if (!/^ws-/.test(old) && !/^ws-/.test(now) && old !== now) $("#search").value = "";
+  const isStory = h => /^(ws|en)-/.test(h);
+  if (!isStory(old)) SCROLL[old] = scrollY;
+  if (isStory(now) && !isStory(old)) CAME_FROM_AUTHOR = /^author-\d+$/.test(old);
+  RESTORE = isStory(old) || now === "";
+  if (!isStory(old) && !isStory(now) && old !== now) $("#search").value = "";
 }, {capture:true});
 addEventListener("hashchange", route);
 function route(){
   const id = location.hash.slice(1);
-  if (id && CATALOG.some(s => s.id === id)) return openStory(id);
+  if (id && ALL.some(s => s.id === id)) return openStory(id);
   const a = /^author-(\d+)$/.exec(id);
   AUTHOR = a && AUTHORS[+a[1]] ? +a[1] : null;
   showLibrary();
@@ -828,7 +839,7 @@ new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) renderMore(
 
 function showEnd(){
   $("#endCard").hidden = false;
-  $("#endDated").textContent = (STORY.dated ? STORY.dated + " · " : "") + "The end";
+  $("#endDated").textContent = (STORY.translator ? "Translated by " + STORY.translator + " · " : "") + (STORY.dated ? STORY.dated + " · " : "") + "The end";
   const nx = nextStory();
   $("#nextBtn").hidden = !nx;
   if (nx){ $("#nextTitle").textContent = nx.title; $("#nextBtn").onclick = () => openStory(nx.id); }
@@ -1008,6 +1019,7 @@ function welcome(){
 const TTS = { on: false, n: 0, voice: null, words: false, cps: 14, timers: [] };   // cps: characters per second at normal speed, learned as it reads
 function bnVoice(){
   const vs = speechSynthesis.getVoices();
+  if (STORY && STORY.lang === "en") return vs.find(v => /^en[-_]GB/i.test(v.lang)) || vs.find(v => /^en[-_]IN/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
   return vs.find(v => /^bn[-_]IN/i.test(v.lang)) || vs.find(v => /^bn/i.test(v.lang)) || null;
 }
 if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => { TTS.voice = bnVoice(); };
@@ -1024,7 +1036,7 @@ function speakFrom(n){
   (document.getElementById("p" + n) || pcols.querySelector('.pp[data-n="' + n + '"]'))?.classList.add("speaking");
   if (S.mode === "pages") pcols.querySelector('.pp[data-n="' + n + '"]')?.classList.add("speaking");
   const u = new SpeechSynthesisUtterance(READ[n - 1].t.replace(/\n/g, " "));
-  u.lang = "bn-IN"; if (TTS.voice) u.voice = TTS.voice; u.rate = +S.rate || 1;
+  u.lang = STORY.lang === "en" ? "en-GB" : "bn-IN"; if (TTS.voice) u.voice = TTS.voice; u.rate = +S.rate || 1;
   // Pages mode: a post can start at the foot of one page and run onto the next. Turn the page
   // when the voice gets there: by the word the phone says it is on, or else by timing.
   TTS.timers.forEach(clearTimeout); TTS.timers = [];
@@ -1066,7 +1078,7 @@ $("#speakBtn").onclick = () => {
   if (!("speechSynthesis" in window)){ toast("This browser can't read aloud."); return; }
   if (TTS.on){ speakStop(); return; }
   TTS.voice = bnVoice();
-  if (!TTS.voice) toast("No Bengali voice found. It may sound odd; install Google's Bengali voice in phone settings.");
+  if (!TTS.voice) toast(STORY && STORY.lang === "en" ? "No English voice found. It may sound odd." : "No Bengali voice found. It may sound odd; install Google's Bengali voice in phone settings.");
   TTS.on = true; $("#speakBtn").setAttribute("aria-pressed", "true");
   bgmStart();
   speakFrom(Math.max(1, currentPost()));
@@ -1239,8 +1251,10 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheets(
 // ---------- ask ChatGPT: one tap opens a temporary chat with the question already asked ----------
 function askGPT(text){
   const lang = S.lang === "Bengali" ? "Answer in colloquial spoken Bengali (চলিত কথ্য বাংলা), the way you'd explain it to a friend, in Bengali script." : "Answer in simple English.";
-  const q = `I'm reading the Bengali story "${STORY.title}" by ${STORY.author}${STORY.dated ? " (written " + STORY.dated + ")" : ""}. Here is a passage:\n\n${text}\n\n` +
-    `Retell it in plain modern language, then explain anything a modern reader might miss (old words, customs, humour, tone). ${lang} Keep it short.`;
+  const en = STORY.lang === "en";
+  const by = STORY.author + (STORY.translator ? ", translated by " + STORY.translator : "");
+  const q = `I'm reading the ${en ? "short" : "Bengali"} story "${STORY.title}" by ${by}${STORY.dated ? " (written " + STORY.dated + ")" : ""}. Here is a passage:\n\n${text}\n\n` +
+    `Retell it in plain modern language, then explain anything a modern reader might miss (${en ? "archaic words, idioms, period references, allusions, tone" : "old words, customs, humour, tone"}). ${lang} Keep it short.`;
   // A named tab: every Ask loads in the same ChatGPT tab instead of opening a new one.
   const w = window.open("https://chatgpt.com/?temporary-chat=true&q=" + encodeURIComponent(q), "bongboi-ai");
   if (w){ try { w.focus(); } catch(e){} }
@@ -1254,9 +1268,30 @@ function pageText(p){
 }
 $("#pAsk").onclick = () => { const t = pageText(PG.page); if (t) askGPT(t); else toast("Nothing to ask about on this page."); };
 
+// ---------- library switch: Bengali / English ----------
+function applyLib(){
+  const en = S.lib === "en";
+  document.documentElement.lang = en ? "en" : "bn";
+  $("#brandSub").textContent = en ? "English stories" : "Bengali stories";
+  $("#libBtn").textContent = en ? "বাংলা" : "English";
+  $("#libBtn").setAttribute("aria-label", en ? "Switch to Bengali stories" : "Switch to English stories");
+  $("#srcNote").textContent = en ? "Texts from Project Gutenberg (public domain), split into short posts. Translations are credited."
+                                 : "Texts from Bengali Wikisource (public domain), split into short posts.";
+}
+function setLib(lib){
+  S.lib = lib; store.set("sr.lib", lib);
+  CATALOG = ALL.filter(s => s.lib === lib); buildAuthors(); applyLib();
+}
+$("#libBtn").onclick = () => {
+  setLib(S.lib === "en" ? "bn" : "en");
+  AUTHOR = null; SEL.clear(); $("#search").value = "";
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  showLibrary(); scrollTo(0, 0);
+};
+
 // ---------- boot ----------
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-applySettings();
+applySettings(); applyLib();
 loadCatalog().then(ok => { if (ok){ buildAuthors(); route(); } });
 // Offline support when hosted on its own (e.g. GitHub Pages). Harmless where not allowed.
 if ("serviceWorker" in navigator && location.protocol === "https:" && !window.claude){

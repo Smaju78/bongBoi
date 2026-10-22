@@ -1,0 +1,1201 @@
+{
+ "count": 130,
+ "stories": [
+  {
+   "id": "en-4366-1",
+   "title": "The Death of Halpin Frayser",
+   "author": "Ambrose Bierce",
+   "collection": "Can Such Things Be?",
+   "posts": 211,
+   "file": "en-4366-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-4366-4",
+   "title": "The Moonlit Road",
+   "author": "Ambrose Bierce",
+   "collection": "Can Such Things Be?",
+   "posts": 125,
+   "file": "en-4366-4.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-4366-6",
+   "title": "Moxon’s Master",
+   "author": "Ambrose Bierce",
+   "collection": "Can Such Things Be?",
+   "posts": 150,
+   "file": "en-4366-6.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-4366-13",
+   "title": "A Resumed Identity",
+   "author": "Ambrose Bierce",
+   "collection": "Can Such Things Be?",
+   "posts": 83,
+   "file": "en-4366-13.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-4366-17",
+   "title": "Beyond the Wall",
+   "author": "Ambrose Bierce",
+   "collection": "Can Such Things Be?",
+   "posts": 126,
+   "file": "en-4366-17.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-4366-23",
+   "title": "The Damned Thing",
+   "author": "Ambrose Bierce",
+   "collection": "Can Such Things Be?",
+   "posts": 202,
+   "file": "en-4366-23.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-4366-24",
+   "title": "An Inhabitant of Carcosa",
+   "author": "Ambrose Bierce",
+   "collection": "Can Such Things Be?",
+   "posts": 54,
+   "file": "en-4366-24.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-4366-25",
+   "title": "The Stranger",
+   "author": "Ambrose Bierce",
+   "collection": "Can Such Things Be?",
+   "posts": 85,
+   "file": "en-4366-25.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-13415-1",
+   "title": "The Lady with the Dog",
+   "author": "Anton Chekhov",
+   "collection": "The Lady with the Dog and Other Stories",
+   "posts": 258,
+   "file": "en-13415-1.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-13415-2",
+   "title": "A Doctor's Visit",
+   "author": "Anton Chekhov",
+   "collection": "The Lady with the Dog and Other Stories",
+   "posts": 186,
+   "file": "en-13415-2.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-13415-4",
+   "title": "Ionitch",
+   "author": "Anton Chekhov",
+   "collection": "The Lady with the Dog and Other Stories",
+   "posts": 294,
+   "file": "en-13415-4.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-13415-6",
+   "title": "The Black Monk",
+   "author": "Anton Chekhov",
+   "collection": "The Lady with the Dog and Other Stories",
+   "posts": 497,
+   "file": "en-13415-6.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-13415-7",
+   "title": "Volodya",
+   "author": "Anton Chekhov",
+   "collection": "The Lady with the Dog and Other Stories",
+   "posts": 213,
+   "file": "en-13415-7.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-1732-1",
+   "title": "The Schoolmistress",
+   "author": "Anton Chekhov",
+   "collection": "The Schoolmistress and Other Stories",
+   "posts": 144,
+   "file": "en-1732-1.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-1732-3",
+   "title": "Misery",
+   "author": "Anton Chekhov",
+   "collection": "The Schoolmistress and Other Stories",
+   "posts": 93,
+   "file": "en-1732-3.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-1732-7",
+   "title": "In Exile",
+   "author": "Anton Chekhov",
+   "collection": "The Schoolmistress and Other Stories",
+   "posts": 144,
+   "file": "en-1732-7.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-1732-9",
+   "title": "Sorrow",
+   "author": "Anton Chekhov",
+   "collection": "The Schoolmistress and Other Stories",
+   "posts": 82,
+   "file": "en-1732-9.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-1732-18",
+   "title": "The Bet",
+   "author": "Anton Chekhov",
+   "collection": "The Schoolmistress and Other Stories",
+   "posts": 100,
+   "file": "en-1732-18.json",
+   "lang": "en",
+   "translator": "Constance Garnett"
+  },
+  {
+   "id": "en-1661-1",
+   "title": "A Scandal in Bohemia",
+   "author": "Arthur Conan Doyle",
+   "collection": "The Adventures of Sherlock Holmes",
+   "posts": 419,
+   "file": "en-1661-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1661-2",
+   "title": "The Red-Headed League",
+   "author": "Arthur Conan Doyle",
+   "collection": "The Adventures of Sherlock Holmes",
+   "posts": 382,
+   "file": "en-1661-2.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1661-3",
+   "title": "A Case of Identity",
+   "author": "Arthur Conan Doyle",
+   "collection": "The Adventures of Sherlock Holmes",
+   "posts": 287,
+   "file": "en-1661-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1661-5",
+   "title": "The Five Orange Pips",
+   "author": "Arthur Conan Doyle",
+   "collection": "The Adventures of Sherlock Holmes",
+   "posts": 319,
+   "file": "en-1661-5.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1661-6",
+   "title": "The Man with the Twisted Lip",
+   "author": "Arthur Conan Doyle",
+   "collection": "The Adventures of Sherlock Holmes",
+   "posts": 402,
+   "file": "en-1661-6.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1661-7",
+   "title": "The Adventure of the Blue Carbuncle",
+   "author": "Arthur Conan Doyle",
+   "collection": "The Adventures of Sherlock Holmes",
+   "posts": 357,
+   "file": "en-1661-7.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1661-8",
+   "title": "The Adventure of the Speckled Band",
+   "author": "Arthur Conan Doyle",
+   "collection": "The Adventures of Sherlock Holmes",
+   "posts": 435,
+   "file": "en-1661-8.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1661-12",
+   "title": "The Adventure of the Copper Beeches",
+   "author": "Arthur Conan Doyle",
+   "collection": "The Adventures of Sherlock Holmes",
+   "posts": 409,
+   "file": "en-1661-12.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2147-1",
+   "title": "The Gold-Bug",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 1",
+   "posts": 543,
+   "file": "en-2147-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2147-3",
+   "title": "The Murders in the Rue Morgue",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 1",
+   "posts": 507,
+   "file": "en-2147-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2147-6",
+   "title": "MS. Found in a Bottle",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 1",
+   "posts": 153,
+   "file": "en-2147-6.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-1",
+   "title": "The Purloined Letter",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 286,
+   "file": "en-2148-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-3",
+   "title": "A Descent into the Maelstrom",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 236,
+   "file": "en-2148-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-6",
+   "title": "The Facts in the Case of M. Valdemar",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 137,
+   "file": "en-2148-6.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-7",
+   "title": "The Black Cat",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 136,
+   "file": "en-2148-7.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-8",
+   "title": "The Fall of the House of Usher",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 246,
+   "file": "en-2148-8.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-10",
+   "title": "The Masque of the Red Death",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 89,
+   "file": "en-2148-10.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-11",
+   "title": "The Cask of Amontillado",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 123,
+   "file": "en-2148-11.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-15",
+   "title": "The Pit and the Pendulum",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 214,
+   "file": "en-2148-15.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-16",
+   "title": "The Premature Burial",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 200,
+   "file": "en-2148-16.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-19",
+   "title": "William Wilson",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 282,
+   "file": "en-2148-19.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-20",
+   "title": "The Tell-Tale Heart",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 68,
+   "file": "en-2148-20.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-21",
+   "title": "Berenice",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 116,
+   "file": "en-2148-21.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2148-22",
+   "title": "Eleonora",
+   "author": "Edgar Allan Poe",
+   "collection": "Tales, Vol. 2",
+   "posts": 84,
+   "file": "en-2148-22.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3077-1",
+   "title": "Boule de Suif",
+   "author": "Guy de Maupassant",
+   "collection": "Original Short Stories, Vol. 1",
+   "posts": 617,
+   "file": "en-3077-1.json",
+   "lang": "en",
+   "translator": "A. E. Henderson and others"
+  },
+  {
+   "id": "en-3077-2",
+   "title": "Two Friends",
+   "author": "Guy de Maupassant",
+   "collection": "Original Short Stories, Vol. 1",
+   "posts": 136,
+   "file": "en-3077-2.json",
+   "lang": "en",
+   "translator": "A. E. Henderson and others"
+  },
+  {
+   "id": "en-3077-5",
+   "title": "Two Little Soldiers",
+   "author": "Guy de Maupassant",
+   "collection": "Original Short Stories, Vol. 1",
+   "posts": 100,
+   "file": "en-3077-5.json",
+   "lang": "en",
+   "translator": "A. E. Henderson and others"
+  },
+  {
+   "id": "en-3077-6",
+   "title": "Father Milon",
+   "author": "Guy de Maupassant",
+   "collection": "Original Short Stories, Vol. 1",
+   "posts": 104,
+   "file": "en-3077-6.json",
+   "lang": "en",
+   "translator": "A. E. Henderson and others"
+  },
+  {
+   "id": "en-3077-11",
+   "title": "Mademoiselle Fifi",
+   "author": "Guy de Maupassant",
+   "collection": "Original Short Stories, Vol. 1",
+   "posts": 154,
+   "file": "en-3077-11.json",
+   "lang": "en",
+   "translator": "A. E. Henderson and others"
+  },
+  {
+   "id": "en-710-1",
+   "title": "Love of Life",
+   "author": "Jack London",
+   "collection": "Love of Life and Other Stories",
+   "posts": 289,
+   "file": "en-710-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-710-4",
+   "title": "The Story of Keesh",
+   "author": "Jack London",
+   "collection": "Love of Life and Other Stories",
+   "posts": 125,
+   "file": "en-710-4.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-710-6",
+   "title": "Brown Wolf",
+   "author": "Jack London",
+   "collection": "Love of Life and Other Stories",
+   "posts": 248,
+   "file": "en-710-6.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-710-8",
+   "title": "Negore, the Coward",
+   "author": "Jack London",
+   "collection": "Love of Life and Other Stories",
+   "posts": 99,
+   "file": "en-710-8.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-1",
+   "title": "The Sisters",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 132,
+   "file": "en-2814-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-2",
+   "title": "An Encounter",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 121,
+   "file": "en-2814-2.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-3",
+   "title": "Araby",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 93,
+   "file": "en-2814-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-4",
+   "title": "Eveline",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 71,
+   "file": "en-2814-4.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-5",
+   "title": "After the Race",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 83,
+   "file": "en-2814-5.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-6",
+   "title": "Two Gallants",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 174,
+   "file": "en-2814-6.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-7",
+   "title": "The Boarding House",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 103,
+   "file": "en-2814-7.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-8",
+   "title": "A Little Cloud",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 225,
+   "file": "en-2814-8.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-9",
+   "title": "Counterparts",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 173,
+   "file": "en-2814-9.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-10",
+   "title": "Clay",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 96,
+   "file": "en-2814-10.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-11",
+   "title": "A Painful Case",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 57,
+   "file": "en-2814-11.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-12",
+   "title": "Ivy Day in the Committee Room",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 283,
+   "file": "en-2814-12.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-13",
+   "title": "A Mother",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 192,
+   "file": "en-2814-13.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-14",
+   "title": "Grace",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 414,
+   "file": "en-2814-14.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2814-15",
+   "title": "The Dead",
+   "author": "James Joyce",
+   "collection": "Dubliners",
+   "posts": 716,
+   "file": "en-2814-15.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1429-1",
+   "title": "At the Bay",
+   "author": "Katherine Mansfield",
+   "collection": "The Garden Party and Other Stories",
+   "posts": 589,
+   "file": "en-1429-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1429-2",
+   "title": "The Garden-Party",
+   "author": "Katherine Mansfield",
+   "collection": "The Garden Party and Other Stories",
+   "posts": 253,
+   "file": "en-1429-2.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1429-4",
+   "title": "Mr. and Mrs. Dove",
+   "author": "Katherine Mansfield",
+   "collection": "The Garden Party and Other Stories",
+   "posts": 130,
+   "file": "en-1429-4.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1429-6",
+   "title": "Life of Ma Parker",
+   "author": "Katherine Mansfield",
+   "collection": "The Garden Party and Other Stories",
+   "posts": 109,
+   "file": "en-1429-6.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1429-8",
+   "title": "The Voyage",
+   "author": "Katherine Mansfield",
+   "collection": "The Garden Party and Other Stories",
+   "posts": 133,
+   "file": "en-1429-8.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1429-9",
+   "title": "Miss Brill",
+   "author": "Katherine Mansfield",
+   "collection": "The Garden Party and Other Stories",
+   "posts": 69,
+   "file": "en-1429-9.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1429-10",
+   "title": "Her First Ball",
+   "author": "Katherine Mansfield",
+   "collection": "The Garden Party and Other Stories",
+   "posts": 99,
+   "file": "en-1429-10.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-243-2",
+   "title": "After the Dance",
+   "author": "Leo Tolstoy",
+   "collection": "The Forged Coupon and Other Stories",
+   "posts": 152,
+   "file": "en-243-2.json",
+   "lang": "en",
+   "translator": "public-domain translators"
+  },
+  {
+   "id": "en-243-3",
+   "title": "Alyosha the Pot",
+   "author": "Leo Tolstoy",
+   "collection": "The Forged Coupon and Other Stories",
+   "posts": 91,
+   "file": "en-243-3.json",
+   "lang": "en",
+   "translator": "public-domain translators"
+  },
+  {
+   "id": "en-243-4",
+   "title": "My Dream",
+   "author": "Leo Tolstoy",
+   "collection": "The Forged Coupon and Other Stories",
+   "posts": 189,
+   "file": "en-243-4.json",
+   "lang": "en",
+   "translator": "public-domain translators"
+  },
+  {
+   "id": "en-243-5",
+   "title": "There Are No Guilty People",
+   "author": "Leo Tolstoy",
+   "collection": "The Forged Coupon and Other Stories",
+   "posts": 171,
+   "file": "en-243-5.json",
+   "lang": "en",
+   "translator": "public-domain translators"
+  },
+  {
+   "id": "en-689-3",
+   "title": "Ivan the Fool",
+   "author": "Leo Tolstoy",
+   "collection": "The Kreutzer Sonata and Other Stories",
+   "posts": 425,
+   "file": "en-689-3.json",
+   "lang": "en",
+   "translator": "Benjamin R. Tucker"
+  },
+  {
+   "id": "en-689-4",
+   "title": "A Lost Opportunity",
+   "author": "Leo Tolstoy",
+   "collection": "The Kreutzer Sonata and Other Stories",
+   "posts": 297,
+   "file": "en-689-4.json",
+   "lang": "en",
+   "translator": "Benjamin R. Tucker"
+  },
+  {
+   "id": "en-689-5",
+   "title": "The Candle",
+   "author": "Leo Tolstoy",
+   "collection": "The Kreutzer Sonata and Other Stories",
+   "posts": 150,
+   "file": "en-689-5.json",
+   "lang": "en",
+   "translator": "Benjamin R. Tucker"
+  },
+  {
+   "id": "en-512-2",
+   "title": "The Birthmark",
+   "author": "Nathaniel Hawthorne",
+   "collection": "Mosses from an Old Manse",
+   "posts": 240,
+   "file": "en-512-2.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-512-4",
+   "title": "Young Goodman Brown",
+   "author": "Nathaniel Hawthorne",
+   "collection": "Mosses from an Old Manse",
+   "posts": 190,
+   "file": "en-512-4.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-512-5",
+   "title": "Rappaccini’s Daughter",
+   "author": "Nathaniel Hawthorne",
+   "collection": "Mosses from an Old Manse",
+   "posts": 423,
+   "file": "en-512-5.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-512-11",
+   "title": "The Celestial Railroad",
+   "author": "Nathaniel Hawthorne",
+   "collection": "Mosses from an Old Manse",
+   "posts": 233,
+   "file": "en-512-11.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-512-13",
+   "title": "Feathertop: A Moralized Legend",
+   "author": "Nathaniel Hawthorne",
+   "collection": "Mosses from an Old Manse",
+   "posts": 278,
+   "file": "en-512-13.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-512-17",
+   "title": "Drowne’s Wooden Image",
+   "author": "Nathaniel Hawthorne",
+   "collection": "Mosses from an Old Manse",
+   "posts": 172,
+   "file": "en-512-17.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-512-19",
+   "title": "Roger Malvin’s Burial",
+   "author": "Nathaniel Hawthorne",
+   "collection": "Mosses from an Old Manse",
+   "posts": 268,
+   "file": "en-512-19.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-512-27",
+   "title": "The Artist of the Beautiful",
+   "author": "Nathaniel Hawthorne",
+   "collection": "Mosses from an Old Manse",
+   "posts": 347,
+   "file": "en-512-27.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-36238-1",
+   "title": "The Mantle",
+   "author": "Nikolai Gogol",
+   "collection": "The Mantle and Other Stories",
+   "posts": 423,
+   "file": "en-36238-1.json",
+   "lang": "en",
+   "translator": "Claud Field"
+  },
+  {
+   "id": "en-36238-2",
+   "title": "The Nose",
+   "author": "Nikolai Gogol",
+   "collection": "The Mantle and Other Stories",
+   "posts": 368,
+   "file": "en-36238-2.json",
+   "lang": "en",
+   "translator": "Claud Field"
+  },
+  {
+   "id": "en-36238-3",
+   "title": "Memoirs of a Madman",
+   "author": "Nikolai Gogol",
+   "collection": "The Mantle and Other Stories",
+   "posts": 294,
+   "file": "en-36238-3.json",
+   "lang": "en",
+   "translator": "Claud Field"
+  },
+  {
+   "id": "en-36238-5",
+   "title": "The Viy",
+   "author": "Nikolai Gogol",
+   "collection": "The Mantle and Other Stories",
+   "posts": 581,
+   "file": "en-36238-5.json",
+   "lang": "en",
+   "translator": "Claud Field"
+  },
+  {
+   "id": "en-2776-2",
+   "title": "The Gift of the Magi",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 83,
+   "file": "en-2776-2.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-4",
+   "title": "The Skylight Room",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 88,
+   "file": "en-2776-4.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-5",
+   "title": "A Service of Love",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 87,
+   "file": "en-2776-5.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-8",
+   "title": "The Cop and the Anthem",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 92,
+   "file": "en-2776-8.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-10",
+   "title": "Memoirs of a Yellow Dog",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 67,
+   "file": "en-2776-10.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-12",
+   "title": "Mammon and the Archer",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 98,
+   "file": "en-2776-12.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-13",
+   "title": "The Green Door",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 108,
+   "file": "en-2776-13.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-18",
+   "title": "The Romance of a Busy Broker",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 56,
+   "file": "en-2776-18.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-19",
+   "title": "After Twenty Years",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 53,
+   "file": "en-2776-19.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-2776-22",
+   "title": "The Furnished Room",
+   "author": "O. Henry",
+   "collection": "The Four Million",
+   "posts": 95,
+   "file": "en-2776-22.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-902-1",
+   "title": "The Happy Prince",
+   "author": "Oscar Wilde",
+   "collection": "The Happy Prince and Other Tales",
+   "posts": 136,
+   "file": "en-902-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-902-2",
+   "title": "The Nightingale and the Rose",
+   "author": "Oscar Wilde",
+   "collection": "The Happy Prince and Other Tales",
+   "posts": 95,
+   "file": "en-902-2.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-902-3",
+   "title": "The Selfish Giant",
+   "author": "Oscar Wilde",
+   "collection": "The Happy Prince and Other Tales",
+   "posts": 60,
+   "file": "en-902-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-902-4",
+   "title": "The Devoted Friend",
+   "author": "Oscar Wilde",
+   "collection": "The Happy Prince and Other Tales",
+   "posts": 172,
+   "file": "en-902-4.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-902-5",
+   "title": "The Remarkable Rocket",
+   "author": "Oscar Wilde",
+   "collection": "The Happy Prince and Other Tales",
+   "posts": 175,
+   "file": "en-902-5.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1858-1",
+   "title": "Lispeth",
+   "author": "Rudyard Kipling",
+   "collection": "Plain Tales from the Hills",
+   "posts": 71,
+   "file": "en-1858-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1858-3",
+   "title": "Thrown Away",
+   "author": "Rudyard Kipling",
+   "collection": "Plain Tales from the Hills",
+   "posts": 126,
+   "file": "en-1858-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1858-9",
+   "title": "His Chance in Life",
+   "author": "Rudyard Kipling",
+   "collection": "Plain Tales from the Hills",
+   "posts": 69,
+   "file": "en-1858-9.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1858-19",
+   "title": "Beyond the Pale",
+   "author": "Rudyard Kipling",
+   "collection": "Plain Tales from the Hills",
+   "posts": 81,
+   "file": "en-1858-19.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1858-25",
+   "title": "The Rout of the White Hussars",
+   "author": "Rudyard Kipling",
+   "collection": "Plain Tales from the Hills",
+   "posts": 131,
+   "file": "en-1858-25.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-1858-30",
+   "title": "The Story of Muhammad Din",
+   "author": "Rudyard Kipling",
+   "collection": "Plain Tales from the Hills",
+   "posts": 43,
+   "file": "en-1858-30.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-236-1",
+   "title": "Mowgli's Brothers",
+   "author": "Rudyard Kipling",
+   "collection": "The Jungle Book",
+   "posts": 267,
+   "file": "en-236-1.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-236-3",
+   "title": "Kaa's Hunting",
+   "author": "Rudyard Kipling",
+   "collection": "The Jungle Book",
+   "posts": 335,
+   "file": "en-236-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-236-5",
+   "title": "Tiger! Tiger!",
+   "author": "Rudyard Kipling",
+   "collection": "The Jungle Book",
+   "posts": 233,
+   "file": "en-236-5.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-236-7",
+   "title": "The White Seal",
+   "author": "Rudyard Kipling",
+   "collection": "The Jungle Book",
+   "posts": 248,
+   "file": "en-236-7.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-236-9",
+   "title": "Rikki-Tikki-Tavi",
+   "author": "Rudyard Kipling",
+   "collection": "The Jungle Book",
+   "posts": 106,
+   "file": "en-236-9.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-236-11",
+   "title": "Toomai of the Elephants",
+   "author": "Rudyard Kipling",
+   "collection": "The Jungle Book",
+   "posts": 249,
+   "file": "en-236-11.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3688-2",
+   "title": "Tobermory",
+   "author": "Saki",
+   "collection": "The Chronicles of Clovis",
+   "posts": 115,
+   "file": "en-3688-2.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3688-3",
+   "title": "Mrs. Packletide's Tiger",
+   "author": "Saki",
+   "collection": "The Chronicles of Clovis",
+   "posts": 54,
+   "file": "en-3688-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3688-5",
+   "title": "The Background",
+   "author": "Saki",
+   "collection": "The Chronicles of Clovis",
+   "posts": 44,
+   "file": "en-3688-5.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3688-7",
+   "title": "The Unrest-Cure",
+   "author": "Saki",
+   "collection": "The Chronicles of Clovis",
+   "posts": 99,
+   "file": "en-3688-7.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3688-9",
+   "title": "Sredni Vashtar",
+   "author": "Saki",
+   "collection": "The Chronicles of Clovis",
+   "posts": 69,
+   "file": "en-3688-9.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3688-15",
+   "title": "Filboid Studge, the Story of a Mouse That Helped",
+   "author": "Saki",
+   "collection": "The Chronicles of Clovis",
+   "posts": 39,
+   "file": "en-3688-15.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3688-16",
+   "title": "The Music on the Hill",
+   "author": "Saki",
+   "collection": "The Chronicles of Clovis",
+   "posts": 85,
+   "file": "en-3688-16.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3056-2",
+   "title": "An Imaginative Woman",
+   "author": "Thomas Hardy",
+   "collection": "Wessex Tales",
+   "posts": 389,
+   "file": "en-3056-2.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3056-3",
+   "title": "The Three Strangers",
+   "author": "Thomas Hardy",
+   "collection": "Wessex Tales",
+   "posts": 338,
+   "file": "en-3056-3.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3056-4",
+   "title": "The Withered Arm",
+   "author": "Thomas Hardy",
+   "collection": "Wessex Tales",
+   "posts": 445,
+   "file": "en-3056-4.json",
+   "lang": "en"
+  },
+  {
+   "id": "en-3056-7",
+   "title": "The Distracted Preacher",
+   "author": "Thomas Hardy",
+   "collection": "Wessex Tales",
+   "posts": 861,
+   "file": "en-3056-7.json",
+   "lang": "en"
+  }
+ ]
+}

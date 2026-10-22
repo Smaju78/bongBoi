@@ -1,12 +1,12 @@
 {
- "count": 131,
+ "count": 151,
  "stories": [
   {
    "id": "en-4366-1",
    "title": "The Death of Halpin Frayser",
    "author": "Ambrose Bierce",
    "collection": "Can Such Things Be?",
-   "posts": 211,
+   "posts": 216,
    "file": "en-4366-1.json",
    "lang": "en"
   },
@@ -15,7 +15,7 @@
    "title": "The Moonlit Road",
    "author": "Ambrose Bierce",
    "collection": "Can Such Things Be?",
-   "posts": 125,
+   "posts": 129,
    "file": "en-4366-4.json",
    "lang": "en"
   },
@@ -51,7 +51,7 @@
    "title": "The Damned Thing",
    "author": "Ambrose Bierce",
    "collection": "Can Such Things Be?",
-   "posts": 202,
+   "posts": 206,
    "file": "en-4366-23.json",
    "lang": "en"
   },
@@ -78,7 +78,7 @@
    "title": "The Lady with the Dog",
    "author": "Anton Chekhov",
    "collection": "The Lady with the Dog and Other Stories",
-   "posts": 258,
+   "posts": 261,
    "file": "en-13415-1.json",
    "lang": "en",
    "translator": "Constance Garnett"
@@ -168,7 +168,7 @@
    "title": "The Bet",
    "author": "Anton Chekhov",
    "collection": "The Schoolmistress and Other Stories",
-   "posts": 100,
+   "posts": 104,
    "file": "en-1732-18.json",
    "lang": "en",
    "translator": "Constance Garnett"
@@ -259,7 +259,7 @@
    "title": "The Murders in the Rue Morgue",
    "author": "Edgar Allan Poe",
    "collection": "Tales, Vol. 1",
-   "posts": 507,
+   "posts": 510,
    "file": "en-2147-3.json",
    "lang": "en"
   },
@@ -313,7 +313,7 @@
    "title": "The Fall of the House of Usher",
    "author": "Edgar Allan Poe",
    "collection": "Tales, Vol. 2",
-   "posts": 246,
+   "posts": 258,
    "file": "en-2148-8.json",
    "lang": "en"
   },
@@ -754,6 +754,126 @@
    "translator": "Benjamin R. Tucker"
   },
   {
+   "id": "en-2680-1",
+   "title": "Book I",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 130,
+   "file": "en-2680-1.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-2",
+   "title": "Book II",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 71,
+   "file": "en-2680-2.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-3",
+   "title": "Book III",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 111,
+   "file": "en-2680-3.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-4",
+   "title": "Book IV",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 181,
+   "file": "en-2680-4.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-5",
+   "title": "Book V",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 182,
+   "file": "en-2680-5.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-6",
+   "title": "Book VI",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 183,
+   "file": "en-2680-6.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-7",
+   "title": "Book VII",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 200,
+   "file": "en-2680-7.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-8",
+   "title": "Book VIII",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 207,
+   "file": "en-2680-8.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-9",
+   "title": "Book IX",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 179,
+   "file": "en-2680-9.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-10",
+   "title": "Book X",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 210,
+   "file": "en-2680-10.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-11",
+   "title": "Book XI",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 146,
+   "file": "en-2680-11.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
+   "id": "en-2680-12",
+   "title": "Book XII",
+   "author": "Marcus Aurelius",
+   "collection": "Meditations",
+   "posts": 125,
+   "file": "en-2680-12.json",
+   "lang": "en",
+   "translator": "Meric Casaubon"
+  },
+  {
    "id": "en-512-2",
    "title": "The Birthmark",
    "author": "Nathaniel Hawthorne",
@@ -1170,6 +1290,86 @@
    "posts": 85,
    "file": "en-3688-16.json",
    "lang": "en"
+  },
+  {
+   "id": "en-64576-1",
+   "title": "Of Providence",
+   "author": "Seneca",
+   "collection": "Minor Dialogues",
+   "posts": 224,
+   "file": "en-64576-1.json",
+   "lang": "en",
+   "translator": "Aubrey Stewart"
+  },
+  {
+   "id": "en-64576-2",
+   "title": "On the Firmness of the Wise Man",
+   "author": "Seneca",
+   "collection": "Minor Dialogues",
+   "posts": 290,
+   "file": "en-64576-2.json",
+   "lang": "en",
+   "translator": "Aubrey Stewart"
+  },
+  {
+   "id": "en-64576-6",
+   "title": "Of Consolation: To Marcia",
+   "author": "Seneca",
+   "collection": "Minor Dialogues",
+   "posts": 492,
+   "file": "en-64576-6.json",
+   "lang": "en",
+   "translator": "Aubrey Stewart"
+  },
+  {
+   "id": "en-64576-7",
+   "title": "Of a Happy Life",
+   "author": "Seneca",
+   "collection": "Minor Dialogues",
+   "posts": 418,
+   "file": "en-64576-7.json",
+   "lang": "en",
+   "translator": "Aubrey Stewart"
+  },
+  {
+   "id": "en-64576-8",
+   "title": "Of Leisure",
+   "author": "Seneca",
+   "collection": "Minor Dialogues",
+   "posts": 109,
+   "file": "en-64576-8.json",
+   "lang": "en",
+   "translator": "Aubrey Stewart"
+  },
+  {
+   "id": "en-64576-9",
+   "title": "Of Peace of Mind",
+   "author": "Seneca",
+   "collection": "Minor Dialogues",
+   "posts": 434,
+   "file": "en-64576-9.json",
+   "lang": "en",
+   "translator": "Aubrey Stewart"
+  },
+  {
+   "id": "en-64576-10",
+   "title": "Of the Shortness of Life",
+   "author": "Seneca",
+   "collection": "Minor Dialogues",
+   "posts": 349,
+   "file": "en-64576-10.json",
+   "lang": "en",
+   "translator": "Aubrey Stewart"
+  },
+  {
+   "id": "en-64576-11",
+   "title": "Of Consolation: To Helvia",
+   "author": "Seneca",
+   "collection": "Minor Dialogues",
+   "posts": 376,
+   "file": "en-64576-11.json",
+   "lang": "en",
+   "translator": "Aubrey Stewart"
   },
   {
    "id": "en-3056-2",

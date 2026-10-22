@@ -189,6 +189,28 @@ CATALOGUE = [
               "The Stranger"]},
 ]
 
+ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]
+_SEN = [("Of Providence", "FIRST"), ("On the Firmness of the Wise Man", "SECOND"), ("Of Anger, Book I", "THIRD"),
+        ("Of Anger, Book II", "FOURTH"), ("Of Anger, Book III", "FIFTH"), ("Of Consolation: To Marcia", "SIXTH"),
+        ("Of a Happy Life", "SEVENTH"), ("Of Leisure", "EIGHTH"), ("Of Peace of Mind", "NINTH"),
+        ("Of the Shortness of Life", "TENTH"), ("Of Consolation: To Helvia", "ELEVENTH"),
+        ("Of Consolation: To Polybius", "TWELFTH")]
+_TO = {"FIRST": " TO", "THIRD": " TO", "FIFTH": " TO", "SIXTH": " TO", "NINTH": " TO", "TENTH": " TO"}
+_HEAD = {t: f"THE {n} BOOK OF THE DIALOGUES OF L. ANNAEUS SENECA, ADDRESSED" + _TO.get(n, "") for t, n in _SEN}
+_HEAD.update({"Of Clemency, Book I": "THE FIRST BOOK OF THE DIALOGUE OF L. ANNAEUS SENECA, ADDRESSED TO",
+              "Of Clemency, Book II": "THE SECOND BOOK OF THE DIALOGUE OF L. ANNAEUS SENECA, ADDRESSED TO"})
+CATALOGUE += [
+    {"id": 64576, "author": "Seneca", "book": "Minor Dialogues", "year": "c. AD 40-62", "translator": "Aubrey Stewart",
+     "all": list(_HEAD), "head": _HEAD,
+     "pick": ["Of Providence", "On the Firmness of the Wise Man", "Of Consolation: To Marcia", "Of a Happy Life",
+              "Of Leisure", "Of Peace of Mind", "Of the Shortness of Life", "Of Consolation: To Helvia"]},
+    {"id": 2680, "author": "Marcus Aurelius", "book": "Meditations", "year": "c. AD 170", "translator": "Meric Casaubon",
+     "all": [f"Book {r}" for r in ROMAN] + ["Appendix"],
+     "head": {**{f"Book {r}": f"THE {n} BOOK" for r, n in zip(ROMAN, ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH",
+              "SEVENTH", "EIGHTH", "NINTH", "TENTH", "ELEVENTH", "TWELFTH"])}, "Appendix": "APPENDIX"},
+     "pick": [f"Book {r}" for r in ROMAN]},
+]
+
 END_LINE = re.compile(r"^(FOOTNOTES?|NOTES? TO THE .*|THE END\.?|NOTES\.?)$", re.I)
 
 
@@ -234,7 +256,7 @@ def story_range(lines, pos, entry, title):
     start = pos[n][-1]
     ends = [len(lines)]
     for other in entry["all"]:
-        for p in pos.get(norm(other), []):
+        for p in pos.get(norm(entry.get("head", {}).get(other, other)), []):
             if p > start:
                 ends.append(p)
     for i in range(start + 1, len(lines)):
@@ -247,7 +269,7 @@ def story_range(lines, pos, entry, title):
 # ---------------------------------------------------------------- cleaning
 
 CAPS_HEADING = re.compile(r"^[A-Z0-9 .,'’“”:;!?\-—()&]+$")
-SECTION = re.compile(r"^(?:CHAPTER\s+)?[IVXLC]+[.—]?(?:\s*[A-Z].*)?$|^\d{1,3}\.?$|^\*(?:\s*\*)+$|^-{3,}$")
+SECTION = re.compile(r"^(?:CHAPTER\s+)?[IVXLC]+[.—]?(?:\s*[A-Z][A-Z0-9 ,.'’“”:;!?\-—()&]*)?$|^\d{1,3}\.?$|^\*(?:\s*\*)+$|^-{3,}$")
 DROP = re.compile(r"^\[(?:Picture|Illustration|Footnote|Sidenote)\b", re.I)
 
 
@@ -277,7 +299,7 @@ def clean_paragraph(lines):
     verse = len(lines) >= 3 and all(len(l) < 60 for l in lines[:-1])
     text = ("\n" if verse else " ").join(lines)
     text = re.sub(r"\s*\(\[Greek:[^\]]*\]\)|\s*\[Greek:[^\]]*\]", "", text)   # transliterated Greek in brackets
-    text = re.sub(r"\[\d+\]", "", text)                      # footnote markers
+    text = re.sub(r"\[\d+\]|\{\d+\}", "", text)              # footnote markers, page numbers
     text = re.sub(r"\[Picture:[^\]]*\]|\[Illustration:?[^\]]*\]", "", text)
     text = re.sub(r"(?<![\w])_([^_\n]+)_(?![\w])", r"\1", text)   # _italics_
     text = text.replace("_", "")
@@ -288,6 +310,10 @@ def clean_paragraph(lines):
 
 def story_paragraphs(chunk, title, notes=None):
     """`notes` collects ALL-CAPS lines that were turned into section breaks (a missing story heading shows up here)."""
+    for i, l in enumerate(chunk):                       # footnote bodies sit at the end, starting "[1] ..."
+        if re.match(r"\[1\]\s", l):
+            chunk = chunk[:i]
+            break
     paras, cur = [], []
     for l in chunk + [""]:
         if l.strip():
@@ -307,7 +333,7 @@ def story_paragraphs(chunk, title, notes=None):
             if out and out[-1] != "---":
                 out.append(p)
             continue
-        if not out and norm(p) == norm(title):
+        if not out and (norm(p) == norm(title) or (p.isupper() and len(p) < 200)):   # repeated title, heading lines
             continue
         out.append(p)
     while out and out[0] == "---":
@@ -327,8 +353,10 @@ BOUNDARY = re.compile(r"([.?!]+[”’\")\]]*)(\s+)(?=[“‘\"(]?[A-Z0-9])")
 def sentences(p):
     out, last = [], 0
     for m in BOUNDARY.finditer(p):
-        before = p[last:m.start()].split(" ")[-1].lstrip("“‘\"(").rstrip(".").lower()
-        if m.group(1) == "." and (before in ABBREV or (len(before) == 1 and before.isalpha())):
+        tok = p[last:m.start()].split(" ")[-1].lstrip("“‘\"(").rstrip(".")
+        before = tok.lower()
+        if m.group(1) == "." and (before in ABBREV or (len(before) == 1 and before.isalpha())
+                                  or re.fullmatch(r"[IVXLC]{2,}", tok)):        # "II. Of him..." numbers
             continue
         out.append(p[last:m.end(1)])
         last = m.end()
@@ -452,7 +480,7 @@ def main():
         pos = heading_positions(lines)
         print(f"\n{entry['author']} - {entry['book']} (#{entry['id']})")
         for title in entry["pick"]:
-            idx = entry["all"].index(entry.get("head", {}).get(title, title))
+            idx = entry["all"].index(title if title in entry["all"] else entry["head"][title])
             rng = story_range(lines, pos, entry, title)
             if not rng:
                 print(f"  NOT FOUND   {title}")

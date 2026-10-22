@@ -1,5 +1,5 @@
 {
- "count": 130,
+ "count": 131,
  "stories": [
   {
    "id": "en-4366-1",
@@ -388,6 +388,16 @@
    "posts": 84,
    "file": "en-2148-22.json",
    "lang": "en"
+  },
+  {
+   "id": "en-10661-1",
+   "title": "The Enchiridion",
+   "author": "Epictetus",
+   "collection": "The Enchiridion",
+   "posts": 272,
+   "file": "en-10661-1.json",
+   "lang": "en",
+   "translator": "George Long"
   },
   {
    "id": "en-3077-1",

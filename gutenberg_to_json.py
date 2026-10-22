@@ -172,6 +172,9 @@ CATALOGUE = [
      "all": ["Love of Life", "A Day's Lodging", "The White Man's Way", "The Story of Keesh", "The Unexpected",
              "Brown Wolf", "The Sun-Dog Trail", "Negore, the Coward"],
      "pick": ["Love of Life", "The Story of Keesh", "Brown Wolf", "Negore, the Coward"]},
+    {"id": 10661, "author": "Epictetus", "book": "The Enchiridion", "year": "c. AD 125", "translator": "George Long",
+     "all": ["The Encheiridion, or Manual"], "pick": ["The Enchiridion"],
+     "head": {"The Enchiridion": "The Encheiridion, or Manual"}},
     {"id": 4366, "author": "Ambrose Bierce", "book": "Can Such Things Be?", "year": 1893,
      "all": ["The Death of Halpin Frayser", "The Secret of Macarger’s Gulch", "One Summer Night",
              "The Moonlit Road", "A Diagnosis of Death", "Moxon’s Master", "A Tough Tussle", "One of Twins",
@@ -225,7 +228,7 @@ def heading_positions(lines):
 def story_range(lines, pos, entry, title):
     """Story text is between its heading (the last full-line match: earlier ones are the contents) and
     the next heading from `all`."""
-    n = norm(title)
+    n = norm(entry.get("head", {}).get(title, title))
     if n not in pos:
         return None
     start = pos[n][-1]
@@ -273,6 +276,7 @@ def clean_paragraph(lines):
         return "---"
     verse = len(lines) >= 3 and all(len(l) < 60 for l in lines[:-1])
     text = ("\n" if verse else " ").join(lines)
+    text = re.sub(r"\s*\(\[Greek:[^\]]*\]\)|\s*\[Greek:[^\]]*\]", "", text)   # transliterated Greek in brackets
     text = re.sub(r"\[\d+\]", "", text)                      # footnote markers
     text = re.sub(r"\[Picture:[^\]]*\]|\[Illustration:?[^\]]*\]", "", text)
     text = re.sub(r"(?<![\w])_([^_\n]+)_(?![\w])", r"\1", text)   # _italics_
@@ -448,7 +452,7 @@ def main():
         pos = heading_positions(lines)
         print(f"\n{entry['author']} - {entry['book']} (#{entry['id']})")
         for title in entry["pick"]:
-            idx = entry["all"].index(title)
+            idx = entry["all"].index(entry.get("head", {}).get(title, title))
             rng = story_range(lines, pos, entry, title)
             if not rng:
                 print(f"  NOT FOUND   {title}")
